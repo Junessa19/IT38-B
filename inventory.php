@@ -179,7 +179,7 @@ foreach ($products as $index => $item) {
 
     // Size dropdown
     echo "<td>
-            <select onchange=\"updateColors('$productId')\" class='size-dropdown'>
+            <select onchange=\"updateProductDetails('$productId')\" class='size-dropdown'>
                 <option value=''>Select</option>";
     foreach ($item[1] as $size) {
         echo "<option value='$size'>$size</option>";
@@ -219,7 +219,7 @@ foreach ($products as $index => $item) {
         product_4: { sizes: ["30", "32", "34"], colors: ["Gray", "Beige"], qty: 35, price: 20 }
     };
 
-    function updateColors(productId) {
+    function updateProductDetails(productId) {
         const row = document.getElementById(productId);
         const sizeDropdown = row.querySelector('.size-dropdown');
         const selectedSize = sizeDropdown.value;
@@ -246,8 +246,7 @@ foreach ($products as $index => $item) {
             colorDropdown.appendChild(opt);
         });
 
-        // Update quantity, price, total, and stock status
-        const quantity = productData[productId].qty;
+        const quantity = productData[productId].qty; // Use quantity for the selected size
         const unitPrice = productData[productId].price;
         qty.textContent = quantity;
         price.textContent = `₱${unitPrice.toFixed(2)}`;
@@ -255,7 +254,6 @@ foreach ($products as $index => $item) {
         status.textContent = quantity <= 10 ? "Low Stock" : "In Stock";
     }
 
-    // Toggle the visibility of the product table when clicking the card
     document.getElementById("productCard").addEventListener("click", function(event) {
         // Prevent toggle if the size or color dropdown is clicked
         if (event.target.closest("select")) return;
