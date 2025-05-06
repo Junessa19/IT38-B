@@ -51,7 +51,7 @@ if (!isset($_SESSION["user"])) {
 <body>
 
 <a class="logout" href="logout.php">Logout</a>
-<h1>Welcome, <?php echo htmlspecialchars($_SESSION["name"]); ?>! 🛍️</h1>
+<h1>Welcome, <?php echo htmlspecialchars($_SESSION["user"]); ?>! 🛍️</h1>
 <h2>Available Products</h2>
 
 <table>
@@ -73,8 +73,8 @@ $products = [
     ["T-Shirt", ["S", "M", "L"], ["Black", "White"], "Uniqlo", 50, 10],
     ["Jeans", ["28", "30", "32"], ["Blue", "Black"], "Levi's", 30, 25],
     ["Skirt", ["S", "M", "L"], ["Red", "Blue"], "Zara", 20, 15],
-    ["Crop Top", ["XS", "S", "M"], ["White", "Pink"], "H&M", 40, 12],
-    ["Trouser", ["30", "32", "34"], ["Gray", "Beige"], "Gap", 35, 20]
+    ["Crop Top", ["XS", "S", "M", "XL", "XXL"], ["White", "Pink"], "H&M", 40, 12],
+    ["Trouser", ["20", "30", "32", "34"], ["Gray", "Beige"], "Gap", 35, 20]
 ];
 
 foreach ($products as $index => $item) {
@@ -111,4 +111,3 @@ foreach ($products as $index => $item) {
 
 </body>
 </html>
-    
