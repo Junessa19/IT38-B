@@ -112,6 +112,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <h2>Register</h2>
       <?php if (isset($error)) echo "<p class='error'>$error</p>"; ?>
       <form method="POST" action="register.php">
+
+      <label>First name</label>
+        <input type="text" name="username" placeholder="Enter your username" required />
+
+        <label>Last name</label>
+        <input type="text" name="username" placeholder="Enter your username" required />
+
         <label>Username</label>
         <input type="text" name="username" placeholder="Enter your username" required />
 

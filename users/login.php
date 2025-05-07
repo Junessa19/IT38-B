@@ -124,7 +124,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <div class="logo-container">
         <img src="logo.png" alt="Logo" class="logo" />
       </div>
-      <h2>Login</h2>
+      <h2>User Login</h2>
       <?php if (isset($error)) echo "<p class='error'>$error</p>"; ?>
       <form method="POST" action="login.php">
         <label>Email</label>
