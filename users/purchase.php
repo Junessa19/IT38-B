@@ -5,7 +5,7 @@ if (!isset($_SESSION["user"])) {
     exit();
 }
 
-include "db_conn.php"; // Make sure this file connects to your database
+include "db.php"; // Make sure this file connects to your database
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $user_id = $_SESSION["user"];
@@ -29,9 +29,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <meta charset="UTF-8">
     <title>Purchase Confirmation</title>
     <style>
+        
         body {
             font-family: Arial, sans-serif;
-            background: #f6e9d7;
+            background: #C7A061;
             padding: 40px;
             color: #333;
         }
