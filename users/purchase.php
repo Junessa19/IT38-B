@@ -5,13 +5,23 @@ if (!isset($_SESSION["user"])) {
     exit();
 }
 
+include "db_conn.php"; // Make sure this file connects to your database
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $user_id = $_SESSION["user"];
     $product = $_POST["product"];
     $size = $_POST["size"];
     $color = $_POST["color"];
     $quantity = (int)$_POST["quantity"];
     $price = (float)$_POST["price"];
     $total = $quantity * $price;
+
+    // Store to database
+    $stmt = $conn->prepare("INSERT INTO purchases (user_id, product, size, color, quantity, price, total) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("isssidd", $user_id, $product, $size, $color, $quantity, $price, $total);
+    $stmt->execute();
+    $stmt->close();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -70,9 +80,3 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </div>
 </body>
 </html>
-<?php
-} else {
-    header("Location: user_dashboard.php");
-    exit();
-}
-?>
