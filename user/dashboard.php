@@ -24,36 +24,7 @@ if (isset($_GET['logout'])) {
             font-family: Arial, sans-serif;
             display: flex;
             height: 100vh;
-        }
-        .sidebar {
-            width: 250px;
-            background: #8B6F3F;
-            color: white;
-            height: 100vh;
-            padding: 20px;
-            position: fixed;
-            left: 0;
-            top: 0;
-            display: flex;
             flex-direction: column;
-            justify-content: space-between;
-        }
-        .logo {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: white;
-            object-fit: cover;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            margin-bottom: 20px;
-            align-self: center;
-        }
-
-        .content {
-            margin-left: 250px;
-            width: calc(100% - 250px);
-            background: #C7A061;
-            min-height: 100vh;
         }
 
         .topbar {
@@ -70,30 +41,43 @@ if (isset($_GET['logout'])) {
             font-weight: bold;
         }
 
-        .search-bar {
-            padding: 8px;
-            border-radius: 5px;
-            border: none;
-            width: 200px;
-        }
-
-        .logout-btn {
-            background: #6b5430;
+        .sidebar {
+            width: 250px;
+            background: #8B6F3F;
             color: white;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            height: 100vh;
+            padding: 20px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        .logout-btn:hover {
-            background: #5a3e1b;
+        .logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: white;
+            object-fit: cover;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            align-self: center;
+        }
+
+        .content {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            background: #C7A061;
+            min-height: 100vh;
+            padding-top: 80px;
         }
 
         .profile-section {
-            position: fixed;
+            position: absolute;
             top: 15px;
-            right: 15px;
+            left: 15px;
             background: #8B6F3F;
             color: white;
             padding: 15px;
@@ -119,6 +103,12 @@ if (isset($_GET['logout'])) {
 
         .profile-section button:hover {
             background: #5a3e1b;
+        }
+
+        .logo-section {
+            position: absolute;
+            top: 15px;
+            right: 15px;
         }
 
         .product-section {
@@ -184,22 +174,20 @@ if (isset($_GET['logout'])) {
     </style>
 </head>
 <body>
-    <div class="sidebar">
+    <div class="topbar">
+        <div class="welcome">Welcome, <?php echo htmlspecialchars($_SESSION["user"]); ?>! 🛍️</div>
+    </div>
+
+    <div class="profile-section">
+        <h3><?php echo htmlspecialchars($_SESSION["user"]); ?>'s Profile</h3>
+        <a href="orders.php"><button>My Orders</button></a>
+    </div>
+
+    <div class="logo-section">
         <img src="logo.png" alt="Logo" class="logo">
-        <a href="?logout=true"><button class="logout-btn">Logout</button></a>
     </div>
 
     <div class="content">
-        <div class="topbar">
-            <div class="welcome">Welcome, <?php echo htmlspecialchars($_SESSION["user"]); ?>! 🛍️</div>
-            <input type="text" class="search-bar" placeholder="Search products...">
-        </div>
-
-        <div class="profile-section">
-            <h3><?php echo htmlspecialchars($_SESSION["user"]); ?>'s Profile</h3>
-            <a href="orders.php"><button>My Orders</button></a>
-        </div>
-
         <div class="product-section">
             <h2>Available Products</h2>
             <div class="product-grid">
