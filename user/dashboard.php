@@ -90,6 +90,37 @@ if (isset($_GET['logout'])) {
             background: #5a3e1b;
         }
 
+        .profile-section {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: #8B6F3F;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 200px;
+            text-align: center;
+        }
+
+        .profile-section h3 {
+            margin-bottom: 10px;
+        }
+
+        .profile-section button {
+            width: 100%;
+            background: #6b5430;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .profile-section button:hover {
+            background: #5a3e1b;
+        }
+
         .product-section {
             padding: 20px;
         }
@@ -162,6 +193,11 @@ if (isset($_GET['logout'])) {
         <div class="topbar">
             <div class="welcome">Welcome, <?php echo htmlspecialchars($_SESSION["user"]); ?>! 🛍️</div>
             <input type="text" class="search-bar" placeholder="Search products...">
+        </div>
+
+        <div class="profile-section">
+            <h3><?php echo htmlspecialchars($_SESSION["user"]); ?>'s Profile</h3>
+            <a href="orders.php"><button>My Orders</button></a>
         </div>
 
         <div class="product-section">
