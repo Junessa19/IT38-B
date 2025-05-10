@@ -1,40 +1,56 @@
 <?php
-// login.php
-include 'db.php';
+// Include database connection file
+include 'db.php'; 
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = trim($_POST["username"]);
+    $first_name = trim($_POST["first_name"]);
+    $last_name = trim($_POST["last_name"]);
     $email = trim($_POST["email"]);
-    $password = $_POST["password"];
+    $raw_password = $_POST["password"];
+    $raw_confirm_password = $_POST["confirm_password"];
 
-    $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE email = ?");
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-
-    $stmt->store_result();
-    if ($stmt->num_rows > 0) {
-        $stmt->bind_result($id, $username, $hashed_password);
-        $stmt->fetch();
-
-        if (password_verify($password, $hashed_password)) {
-            $_SESSION["user"] = $username;
-            header("Location: user_dashboard.php"); // Adjust if needed
-            exit();
-        } else {
-            $error = "Incorrect password!";
-        }
+    // Check if passwords match
+    if ($raw_password !== $raw_confirm_password) {
+        $error = "Passwords do not match!";
     } else {
-        $error = "User not found!";
+        // Check if username or email already exists
+        $check_stmt = $conn->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
+        $check_stmt->bind_param("ss", $username, $email);
+        $check_stmt->execute();
+        $check_stmt->store_result();
+
+        if ($check_stmt->num_rows > 0) {
+            $error = "Username or email already exists!";
+        } else {
+            $password = password_hash($raw_password, PASSWORD_DEFAULT);
+
+            // Insert new user
+            $stmt = $conn->prepare("INSERT INTO users (username, first_name, last_name, email, password) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("sssss", $username, $first_name, $last_name, $email, $password);
+
+            if ($stmt->execute()) {
+                header("Location: login.php");
+                exit();
+            } else {
+                $error = "Registration failed. Try again.";
+            }
+
+            $stmt->close();
+        }
+
+        $check_stmt->close();
     }
-    $stmt->close();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login</title>
+  <title>Register</title>
   <style>
     body {
         font-family: Arial, sans-serif;
@@ -98,11 +114,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     button:hover {
         background-color: #8C6842;
     }
-    .forgot {
-        font-size: 12px;
-        margin: 5px 0;
-        text-align: left;
-    }
     .error {
         font-size: 12px;
         color: red;
@@ -124,19 +135,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       <div class="logo-container">
         <img src="logo.png" alt="Logo" class="logo" />
       </div>
-      <h2>User Login</h2>
+      <h2>Register</h2>
       <?php if (isset($error)) echo "<p class='error'>$error</p>"; ?>
-      <form method="POST" action="login.php">
+      <form method="POST" action="register.php">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Enter your username" required />
+
+        <label>First Name</label>
+        <input type="text" name="first_name" placeholder="Enter your first name" required />
+
+        <label>Last Name</label>
+        <input type="text" name="last_name" placeholder="Enter your last name" required />
+
         <label>Email</label>
         <input type="email" name="email" placeholder="Enter your email" required />
 
         <label>Password</label>
-        <input type="password" name="password" placeholder="Enter your password" required />
+        <input type="password" name="password" placeholder="Create a password" required />
 
-        <p class="forgot"><a href="forgot.php">Forgot password?</a></p>
-        <button type="submit">LOGIN</button>
+        <label>Confirm Password</label>
+        <input type="password" name="confirm_password" placeholder="Confirm your password" required />
+
+        <button type="submit">REGISTER</button>
       </form>
-      <p style="text-align:center;">Not a member? <a href="register.php">Register</a></p>
+      <p style="text-align:center;">Already have an account? <a href="login.php">Login here</a></p>
     </div>
   </div>
 </body>

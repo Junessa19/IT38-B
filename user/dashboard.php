@@ -16,7 +16,7 @@ if (isset($_GET['logout'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Dashboard - Shop</title>
+    <title>Dashboard - Shop</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -96,40 +96,58 @@ if (isset($_GET['logout'])) {
 
         h2 {
             color: #5a3e1b;
+            margin-bottom: 20px;
+        }
+
+        .product-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .product-card {
+            background: white;
+            padding: 15px;
+            width: 220px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
             margin-bottom: 10px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
+        .product-card h3 {
+            color: #5a3e1b;
+            margin: 10px 0 5px;
         }
 
-        th, td {
-            padding: 12px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-
-        th {
-            background: #8B6F3F;
-            color: white;
-        }
-
-        select, input[type="number"], button {
-            padding: 5px;
+        .product-card p {
             margin: 5px 0;
         }
 
-        button {
+        .product-card select,
+        .product-card input[type="number"] {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+
+        .product-card button {
+            width: 100%;
             background: #8B6F3F;
             color: white;
             border: none;
+            padding: 8px;
             border-radius: 5px;
             cursor: pointer;
         }
 
-        button:hover {
+        .product-card button:hover {
             background: #6b5430;
         }
     </style>
@@ -148,20 +166,7 @@ if (isset($_GET['logout'])) {
 
         <div class="product-section">
             <h2>Available Products</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Size</th>
-                        <th>Color</th>
-                        <th>Brand</th>
-                        <th>Available</th>
-                        <th>Price</th>
-                        <th>Quantity to Buy</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
+            <div class="product-grid">
                 <?php
                 $products = [
                     ["T-Shirt", ["S", "M", "L"], ["Black", "White"], "Uniqlo", 50, 10],
@@ -171,7 +176,7 @@ if (isset($_GET['logout'])) {
                     ["Trouser", ["20", "30", "32", "34"], ["Gray", "Beige"], "Gap", 35, 20]
                 ];
 
-                foreach ($products as $index => $item) {
+                foreach ($products as $item) {
                     $productName = $item[0];
                     $sizes = $item[1];
                     $colors = $item[2];
@@ -179,29 +184,33 @@ if (isset($_GET['logout'])) {
                     $available = $item[4];
                     $price = $item[5];
 
-                    echo "<tr>";
+                    $imageFile = strtolower(str_replace(' ', '-', $productName)) . ".jpg";
+
+                    echo "<div class='product-card'>";
+                    echo "<img src='images/$imageFile' alt='$productName'>";
+                    echo "<h3>$productName</h3>";
+                    echo "<p>Brand: $brand</p>";
+                    echo "<p>Available: $available</p>";
+                    echo "<p>Price: ₱" . number_format($price, 2) . "</p>";
                     echo "<form method='POST' action='purchase.php'>";
-                    echo "<td>$productName<input type='hidden' name='product' value='$productName'></td>";
-
-                    echo "<td><select name='size' required><option value=''>Select</option>";
+                    echo "<input type='hidden' name='product' value='$productName'>";
+                    echo "<input type='hidden' name='price' value='$price'>";
+                    echo "<label>Size:</label>";
+                    echo "<select name='size' required><option value=''>Select</option>";
                     foreach ($sizes as $s) echo "<option value='$s'>$s</option>";
-                    echo "</select></td>";
-
-                    echo "<td><select name='color' required><option value=''>Select</option>";
+                    echo "</select>";
+                    echo "<label>Color:</label>";
+                    echo "<select name='color' required><option value=''>Select</option>";
                     foreach ($colors as $c) echo "<option value='$c'>$c</option>";
-                    echo "</select></td>";
-
-                    echo "<td>$brand</td>";
-                    echo "<td>$available</td>";
-                    echo "<td>₱" . number_format($price, 2) . "<input type='hidden' name='price' value='$price'></td>";
-                    echo "<td><input type='number' name='quantity' min='1' max='$available' required></td>";
-                    echo "<td><button type='submit'>Purchase</button></td>";
+                    echo "</select>";
+                    echo "<label>Quantity:</label>";
+                    echo "<input type='number' name='quantity' min='1' max='$available' required>";
+                    echo "<button type='submit'>Purchase</button>";
                     echo "</form>";
-                    echo "</tr>";
+                    echo "</div>";
                 }
                 ?>
-                </tbody>
-            </table>
+            </div>
         </div>
     </div>
 </body>
