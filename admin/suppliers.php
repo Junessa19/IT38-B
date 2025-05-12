@@ -12,7 +12,7 @@ if (!isset($_SESSION["user"])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suppliers</title>
     <style>
-        /* [Same styling as other pages] */
+       
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; display: flex; height: 100vh; }
         .sidebar {
