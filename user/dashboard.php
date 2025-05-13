@@ -7,26 +7,22 @@ if (isset($_GET['logout'])) {
     exit();
 }
 
-
 if (!isset($_SESSION["user"])) {
     header("Location: login.php");
     exit();
 }
 
 $host     = 'localhost';
-$dbUser   = 'root';            
-$dbPass   = '';                
-$dbName   = 'clothing_store';  
+$dbUser   = 'root';
+$dbPass   = '';
+$dbName   = 'clothing_store';
 
 $conn = new mysqli($host, $dbUser, $dbPass, $dbName);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-
-$sql = "SELECT name, sizes, colors, brand, quantity, price
-        FROM products
-        ORDER BY name";
+$sql = "SELECT name, sizes, colors, brand, quantity, price FROM products ORDER BY name";
 $res = $conn->query($sql);
 $products = [];
 if ($res && $res->num_rows > 0) {
@@ -65,41 +61,58 @@ $conn->close();
             padding: 15px;
             color: white;
         }
-        .welcome { font-size: 20px; font-weight: bold; }
+        .welcome {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .topbar-buttons button.orders-button {
+            background: white;
+            color: #8B6F3F;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .topbar-buttons button.orders-button:hover {
+            background: #f2e2c6;
+        }
         .sidebar {
-            width: 250px; background: #8B6F3F; color: white;
-            height: 100vh; padding: 20px; position: fixed; left: 0; top: 0;
-            display: flex; flex-direction: column; justify-content: space-between;
+            width: 250px;
+            background: #8B6F3F;
+            color: white;
+            height: 100vh;
+            padding: 20px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
-       .logo { 
-    position: fixed; 
-    top: 20px; 
-    left: 20px; 
-    width: 120px; 
-    height: 120px; 
-    border-radius: 50%; 
-    background: white;
-    object-fit: cover; 
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    z-index: 1000; 
-}
-
-        .profile-section {
-            position: absolute; top: 15px; left: 15px;
-            background: #8B6F3F; color: white; padding: 15px; border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 200px; text-align: center;
+        .logo {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: white;
+            object-fit: cover;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            z-index: 1000;
         }
-        .profile-section button {
-            width: 100%; background: #6b5430; color: white;
-            border: none; padding: 8px; border-radius: 5px; cursor: pointer;
-        }
-        .profile-section button:hover { background: #5a3e1b; }
         .logo-section {
-            position: absolute; top: 15px; right: 15px;
+            position: absolute;
+            top: 15px;
+            right: 15px;
         }
         .content {
-            margin-left: 250px; width: calc(100% - 250px);
-            background: #C7A061; min-height: 100vh; padding-top: 80px;
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            background: #C7A061;
+            min-height: 280vh;
+            padding-top: 80px;
         }
         .product-section { padding: 20px; }
         h2 { color: #5a3e1b; margin-bottom: 20px; }
@@ -130,16 +143,16 @@ $conn->close();
     </style>
 </head>
 <body>
-    <div class="topbar">
+    
+  <div class="topbar">
+    <div class="topbar-left">
         <div class="welcome">
             Welcome, <?= htmlspecialchars($_SESSION["user"]) ?>! 🛍️
         </div>
+        <a href="orders.php" class="orders-button">My Orders</a>
     </div>
+</div>
 
-    <div class="profile-section">
-        <h3><?= htmlspecialchars($_SESSION["user"]) ?>'s Profile</h3>
-        <a href="orders.php"><button>My Orders</button></a>
-    </div>
 
     <div class="logo-section">
         <img src="logo.png" alt="Logo" class="logo">
