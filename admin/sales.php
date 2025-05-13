@@ -151,8 +151,8 @@ if ($conn->connect_error) {
             display: none;
             padding: 10px;
             margin-top: 10px;
+            text-align: left;
         }
-
     </style>
 </head>
 <body>
@@ -175,7 +175,8 @@ if ($conn->connect_error) {
             <input type="text" class="search-bar" placeholder="Search...">
         </div>
         <div class="dashboard-content">
-        
+
+         
             <div class="card">
                 <button class="collapsible">🧾 Sales Overview</button>
                 <div class="content-section">
@@ -192,24 +193,57 @@ if ($conn->connect_error) {
                 </div>
             </div>
 
-          
+        
             <div class="card">
-                <button class="collapsible">📅 Sales by Date</button>
+                <button class="collapsible">📅 Sales by Month</button>
                 <div class="content-section">
                     <?php
-                    $res2 = $conn->query("SELECT SUM(total_price) AS total_sales_by_date, DATE(order_date) AS order_date FROM orders GROUP BY order_date");
-                    if ($res2->num_rows > 0) {
-                        while ($data2 = $res2->fetch_assoc()) {
-                            echo "<br>Date: " . $data2['order_date'] . " - ₱" . number_format($data2['total_sales_by_date'], 2);
+                    $resMonth = $conn->query("
+                        SELECT 
+                            YEAR(order_date) AS year, 
+                            MONTH(order_date) AS month, 
+                            SUM(total_price) AS total_sales_by_month 
+                        FROM orders 
+                        GROUP BY year, month 
+                        ORDER BY year DESC, month DESC
+                    ");
+                    if ($resMonth->num_rows > 0) {
+                        while ($data = $resMonth->fetch_assoc()) {
+                            echo "<br>Month " . $data['month'] . " of " . $data['year'] . " - ₱" . number_format($data['total_sales_by_month'], 2);
                         }
                     } else {
-                        echo "No sales data by date.";
+                        echo "No monthly sales data.";
                     }
                     ?>
                 </div>
             </div>
 
-        
+            <!-- Sales by Week -->
+            <div class="card">
+                <button class="collapsible">🗓️ Sales by Week</button>
+                <div class="content-section">
+                    <?php
+                    $resWeek = $conn->query("
+                        SELECT 
+                            YEAR(order_date) AS year, 
+                            WEEK(order_date, 1) AS week, 
+                            SUM(total_price) AS total_sales_by_week 
+                        FROM orders 
+                        GROUP BY year, week 
+                        ORDER BY year DESC, week DESC
+                    ");
+                    if ($resWeek->num_rows > 0) {
+                        while ($data = $resWeek->fetch_assoc()) {
+                            echo "<br>Week " . $data['week'] . " of " . $data['year'] . " - ₱" . number_format($data['total_sales_by_week'], 2);
+                        }
+                    } else {
+                        echo "No weekly sales data.";
+                    }
+                    ?>
+                </div>
+            </div>
+
+            <!-- Customer Orders -->
             <div class="card">
                 🛒 Customer Orders
                 <br><br>
@@ -219,10 +253,9 @@ if ($conn->connect_error) {
     </div>
 
     <script>
-        
         var coll = document.getElementsByClassName("collapsible");
         for (var i = 0; i < coll.length; i++) {
-            coll[i].addEventListener("click", function() {
+            coll[i].addEventListener("click", function () {
                 this.classList.toggle("active");
                 var content = this.nextElementSibling;
                 if (content.style.display === "block") {
