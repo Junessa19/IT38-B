@@ -8,19 +8,19 @@ if (!isset($_SESSION['user'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // 2) Grab the POST data
-    $product = $_POST['product'];
-    $size    = $_POST['size'];
-    $color   = $_POST['color'];
+    // 2) Get POST data
+    $product  = $_POST['product'];
+    $size     = $_POST['size'];
+    $color    = $_POST['color'];
     $quantity = (int) $_POST['quantity'];
     $price    = (float) $_POST['price'];
     $total    = $quantity * $price;
 
-    // 3) Save to database
+    // 3) Connect to DB
     $host = 'localhost';
     $db   = 'clothing_store';
-    $user = 'root';    // XAMPP default
-    $pass = '';        // XAMPP default (blank)
+    $user = 'root';
+    $pass = '';
     $dsn  = "mysql:host=$host;dbname=$db;charset=utf8mb4";
 
     try {
@@ -28,31 +28,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
         ]);
 
-        $sql = "INSERT INTO orders
-                (user_id, product_name, size, color, quantity, total_price, status, order_date)
-                VALUES
-                (:user_id, :product_name, :size, :color, :quantity, :total_price, :status, NOW())";
+        // 4) Check stock availability
+        $check_sql = "SELECT quantity FROM products
+                      WHERE name = :product_name
+                      AND FIND_IN_SET(:size, sizes) > 0
+                      AND FIND_IN_SET(:color, colors) > 0
+                      LIMIT 1";
+        $check_stmt = $pdo->prepare($check_sql);
+        $check_stmt->execute([
+            ':product_name' => $product,
+            ':size'         => $size,
+            ':color'        => $color
+        ]);
 
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([
-            ':user_id'       => $_SESSION['user'],  // your session stores user ID
-            ':product_name'  => $product,
-            ':size'          => $size,
-            ':color'         => $color,
-            ':quantity'      => $quantity,
-            ':total_price'   => $total,
-            ':status'        => 'Pending',
+        $productData = $check_stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$productData || $productData['quantity'] < $quantity) {
+            die("❌ Not enough stock available.");
+        }
+
+        // 5) Insert into orders table
+        $order_sql = "INSERT INTO orders
+                      (user_id, product_name, size, color, quantity, total_price, status, order_date)
+                      VALUES
+                      (:user_id, :product_name, :size, :color, :quantity, :total_price, :status, NOW())";
+
+        $order_stmt = $pdo->prepare($order_sql);
+        $order_stmt->execute([
+            ':user_id'      => $_SESSION['user'],
+            ':product_name' => $product,
+            ':size'         => $size,
+            ':color'        => $color,
+            ':quantity'     => $quantity,
+            ':total_price'  => $total,
+            ':status'       => 'Pending',
+        ]);
+
+        // 6) Update stock in products table
+        $update_sql = "UPDATE products
+                       SET quantity = quantity - :quantity
+                       WHERE name = :product_name
+                       AND FIND_IN_SET(:size, sizes) > 0
+                       AND FIND_IN_SET(:color, colors) > 0";
+
+        $update_stmt = $pdo->prepare($update_sql);
+        $update_stmt->execute([
+            ':quantity'     => $quantity,
+            ':product_name' => $product,
+            ':size'         => $size,
+            ':color'        => $color
         ]);
 
     } catch (PDOException $e) {
-        // In production, log this instead of echoing
         die("Database error: " . $e->getMessage());
     }
 
-    // 4) Show confirmation
+    // 7) Show confirmation
     ?>
     <!DOCTYPE html>
-    <html lang="en">
+    <html>
     <head>
         <meta charset="UTF-8">
         <title>Purchase Confirmation</title>
@@ -61,7 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 font-family: Arial, sans-serif;
                 background: #C7A061;
                 padding: 40px;
-                color: #333;
             }
             .container {
                 max-width: 600px;
@@ -70,14 +103,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 padding: 30px;
                 border-radius: 10px;
                 box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                color: #333;
             }
             h2 {
                 color: #5a3e1b;
                 margin-bottom: 20px;
             }
-            p {
-                font-size: 18px;
-                line-height: 1.6;
+            .highlight {
+                font-weight: bold;
             }
             a.back {
                 display: inline-block;
@@ -87,10 +120,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 color: white;
                 padding: 10px 15px;
                 border-radius: 5px;
-            }
-            .highlight {
-                font-weight: bold;
-                color: #333;
             }
         </style>
     </head>
@@ -112,6 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// If not POST, redirect back
+// Redirect if not POST
 header('Location: dashboard.php');
 exit;
+?>
