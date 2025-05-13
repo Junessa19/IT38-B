@@ -5,13 +5,31 @@ session_start();
 //     header("Location: login.php");
 //     exit();
 // Assuming `$products` is in a database or session, for now, it's still static
-$products = [ 
+$products = [
     ["T-Shirt", ["S", "M", "L"], ["Black", "White"], "Uniqlo", 50, 10],
     ["Jeans", ["28", "30", "32"], ["Blue", "Black"], "Levi's", 30, 25],
     ["Skirt", ["S", "M", "L"], ["Red", "Blue"], "Zara", 0, 15],
     ["Crop Top", ["XS", "S", "M"], ["White", "Pink"], "H&M", 8, 12],
-    // More products...
+    ["Trouser", ["30", "32", "34"], ["Gray", "Beige"], "Gap", 35, 20],
+    ["Jacket", ["M", "L", "XL"], ["Black", "Gray"], "North Face", 5, 50],
+    ["Blazer", ["S", "M", "L"], ["Navy", "Gray"], "Zalora", 25, 40],
+    ["Shorts", ["28", "30", "32"], ["Khaki", "Olive"], "Bench", 12, 18],
+    ["Sweater", ["S", "M", "L"], ["Green", "Maroon"], "Penshoppe", 9, 22],
+    ["Hoodie", ["M", "L", "XL"], ["Black", "Red"], "Adidas", 0, 35],
+    ["Leggings", ["S", "M", "L"], ["Black", "Purple"], "Nike", 15, 30],
+    ["Blouse", ["XS", "S", "M"], ["Peach", "Cream"], "Forever 21", 18, 28],
+    ["Polo Shirt", ["S", "M", "L"], ["White", "Blue"], "Lacoste", 22, 32],
+    ["Tank Top", ["XS", "S", "M"], ["Yellow", "White"], "H&M", 11, 14],
+    ["Cardigan", ["S", "M", "L"], ["Beige", "Gray"], "Zara", 6, 24],
+    ["Denim Jacket", ["M", "L", "XL"], ["Denim", "Black"], "Levi's", 13, 48],
+    ["Tracksuit", ["M", "L", "XL"], ["Gray", "Navy"], "Adidas", 20, 55],
+    ["Overalls", ["S", "M", "L"], ["Blue", "Dark Blue"], "Gap", 4, 42],
+    ["Raincoat", ["S", "M", "L"], ["Yellow", "Transparent"], "Uniqlo", 2, 36],
+    ["Kimono", ["One Size"], ["Pink", "Floral"], "Japan Style", 7, 38],
+    // New product added here:
+    ["New Product", ["S", "M", "L"], ["Color1", "Color2"], "Brand Name", 10, 20]
 ];
+
 
 // Handling Add, Edit, and Delete Product operations
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -92,20 +110,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Back Button -->
     <button class="back-button" onclick="window.history.back()">Go Back</button>
 
-    <!-- Add Product Form -->
-    <div class="form-container">
-        <h3>Add New Product</h3>
-        <form method="POST">
-            <input type="text" name="name" placeholder="Product Name" required><br>
-            <input type="text" name="sizes" placeholder="Sizes (comma-separated)" required><br>
-            <input type="text" name="colors" placeholder="Colors (comma-separated)" required><br>
-            <input type="text" name="brand" placeholder="Brand" required><br>
-            <input type="number" name="quantity" placeholder="Quantity" required><br>
-            <input type="number" step="0.01" name="price" placeholder="Price" required><br>
-            <button type="submit" name="add_product">Add Product</button>
-        </form>
-    </div>
-
     <table>
         <thead>
             <tr>
@@ -163,6 +167,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endforeach; ?>
         </tbody>
     </table>
+
+    <!-- Add Product Form -->
+    <div class="form-container">
+        <h3>Add New Product</h3>
+        <form method="POST">
+            <input type="text" name="name" placeholder="Product Name" required><br>
+            <input type="text" name="sizes" placeholder="Sizes (comma-separated)" required><br>
+            <input type="text" name="colors" placeholder="Colors (comma-separated)" required><br>
+            <input type="text" name="brand" placeholder="Brand" required><br>
+            <input type="number" name="quantity" placeholder="Quantity" required><br>
+            <input type="number" step="0.01" name="price" placeholder="Price" required><br>
+            <button type="submit" name="add_product">Add Product</button>
+        </form>
+    </div>
 
 <script>
     const productData = <?php
