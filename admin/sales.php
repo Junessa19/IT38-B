@@ -291,12 +291,11 @@ if ($conn->connect_error) {
             </div>
 
             <div class="card">
-                🛒 Customer Orders
-                <br><br>
-                <a href="customer_orders.php" class="view-button">View</a>
-            </div>
-        </div>
-    </div>
+    🛒 Customer Orders
+    <br><br>
+    <a href="customer_orders.php" class="view-button">View</a>
+</div>
+
 
     <script>
         // Collapsible sections
@@ -309,7 +308,6 @@ if ($conn->connect_error) {
             });
         }
 
-        // Toggle full sales container
         function toggleSales() {
             var salesDiv = document.getElementById("salesContainer");
             salesDiv.classList.toggle("show");
