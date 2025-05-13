@@ -1,22 +1,29 @@
 <?php
 session_start();
+
+if (isset($_GET['logout'])) {
+    session_destroy();  
+    header("Location: login.php");  
+    exit();
+}
+
+
 if (!isset($_SESSION["user"])) {
     header("Location: login.php");
     exit();
 }
 
-// 1) Database connection
 $host     = 'localhost';
-$dbUser   = 'root';            // XAMPP default
-$dbPass   = '';                // XAMPP default (blank)
-$dbName   = 'clothing_store';  // Your actual DB name
+$dbUser   = 'root';            
+$dbPass   = '';                
+$dbName   = 'clothing_store';  
 
 $conn = new mysqli($host, $dbUser, $dbPass, $dbName);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// 2) Fetch products
+
 $sql = "SELECT name, sizes, colors, brand, quantity, price
         FROM products
         ORDER BY name";
@@ -148,7 +155,6 @@ $conn->close();
             <h2>Available Products</h2>
             <div class="product-grid">
               <?php foreach ($products as $item): 
-                  // skip items out of stock?
                   if ($item['quantity'] < 1) continue;
                   $img = 'images/' . strtolower(str_replace(' ', '-', $item['name'])) . '.jpg';
               ?>
