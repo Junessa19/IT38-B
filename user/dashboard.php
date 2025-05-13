@@ -71,17 +71,19 @@ $conn->close();
             height: 100vh; padding: 20px; position: fixed; left: 0; top: 0;
             display: flex; flex-direction: column; justify-content: space-between;
         }
-        .logo { 
-            position: fixed; 
-            top: 20px; 
-            left: 20px; 
-            width: 120px; 
-            height: 120px; 
-            border-radius: 50%; 
-            background: white;
-            object-fit: cover; 
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-        }
+       .logo { 
+    position: fixed; 
+    top: 20px; 
+    left: 20px; 
+    width: 120px; 
+    height: 120px; 
+    border-radius: 50%; 
+    background: white;
+    object-fit: cover; 
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    z-index: 1000; 
+}
+
         .profile-section {
             position: absolute; top: 15px; left: 15px;
             background: #8B6F3F; color: white; padding: 15px; border-radius: 8px;
