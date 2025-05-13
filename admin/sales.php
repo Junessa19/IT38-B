@@ -111,8 +111,8 @@ if ($conn->connect_error) {
             font-weight: bold;
             position: relative;
         }
-        .view-button, .collapsible {
-            margin-top: 10px;
+        .view-button {
+            margin-top: 20px;
             padding: 10px 20px;
             background-color: #8B6F3F;
             color: white;
@@ -120,10 +120,20 @@ if ($conn->connect_error) {
             border-radius: 5px;
             cursor: pointer;
             text-decoration: none;
-            font-size: 16px;
         }
-        .view-button:hover, .collapsible:hover {
+        .view-button:hover {
             background-color: #6e4c2f;
+        }
+        .collapsible {
+            cursor: pointer;
+            padding: 10px;
+            background-color: #8B6F3F;
+            color: white;
+            border: none;
+            width: 100%;
+            text-align: left;
+            border-radius: 5px;
+            font-size: 18px;
         }
         .collapsible:after {
             content: ' ▼';
@@ -143,33 +153,43 @@ if ($conn->connect_error) {
             visibility: visible;
             height: auto;
         }
-        .sales-container {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-        }
         .sales-result {
-            flex: 1;
-            background: #f7f7f7;
-            padding: 15px;
-            border-radius: 10px;
-            font-weight: normal;
-            font-size: 16px;
+            display: none;
         }
-        table {
+        .sales-result.show {
+            display: flex;
+            gap: 30px;
+            justify-content: space-between;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .sales-table {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 300px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .sales-table h3 {
+            margin-bottom: 10px;
+            color: #8B6F3F;
+            font-size: 18px;
+            border-bottom: 2px solid #C7A061;
+            padding-bottom: 5px;
+        }
+        .sales-table table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 14px;
-            margin-top: 10px;
         }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px 10px;
+        .sales-table th, .sales-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
             text-align: left;
         }
-        th {
-            background-color: #8B6F3F;
-            color: white;
+        .sales-table th {
+            background-color: #f4e1c1;
+            color: #5b4223;
         }
     </style>
 </head>
@@ -201,8 +221,13 @@ if ($conn->connect_error) {
                 <div class="content-section">
                     <?php
                     $res1 = $conn->query("SELECT SUM(total_price) AS total_sales FROM orders");
-                    $data1 = $res1->fetch_assoc();
-                    echo "Total Sales: ₱" . number_format($data1['total_sales'], 2);
+                    if ($res1->num_rows > 0) {
+                        $data1 = $res1->fetch_assoc();
+                        $total_sales = $data1['total_sales'] ?? 0;
+                        echo "Total Sales: ₱" . number_format($total_sales, 2);
+                    } else {
+                        echo "Error retrieving sales data.";
+                    }
                     ?>
                 </div>
             </div>
@@ -210,49 +235,52 @@ if ($conn->connect_error) {
             <div class="card">
                 <button class="collapsible">📅 Sales by Date</button>
                 <div class="content-section">
-                    <div class="sales-container">
-                        <div class="sales-result">
+                    <button class="view-button" onclick="toggleSales()">Show Sales</button>
+
+                    <div id="salesContainer" class="sales-result">
+                        <div class="sales-table">
                             <h3>🗓️ Weekly Sales</h3>
                             <table>
                                 <thead>
                                     <tr>
                                         <th>Year</th>
                                         <th>Week</th>
-                                        <th>Total</th>
+                                        <th>Total Sales</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php
                                     $resWeek = $conn->query("SELECT SUM(total_price) AS total_sales_week, WEEK(order_date) AS week, YEAR(order_date) AS year FROM orders GROUP BY year, week ORDER BY year DESC, week DESC");
-                                    while ($row = $resWeek->fetch_assoc()) {
-                                        echo "<tr>
-                                                <td>{$row['year']}</td>
-                                                <td>{$row['week']}</td>
-                                                <td>₱" . number_format($row['total_sales_week'], 2) . "</td>
-                                            </tr>";
+                                    if ($resWeek->num_rows > 0) {
+                                        while ($row = $resWeek->fetch_assoc()) {
+                                            echo "<tr><td>{$row['year']}</td><td>{$row['week']}</td><td>₱" . number_format($row['total_sales_week'], 2) . "</td></tr>";
+                                        }
+                                    } else {
+                                        echo "<tr><td colspan='3'>No weekly sales data.</td></tr>";
                                     }
                                     ?>
                                 </tbody>
                             </table>
                         </div>
 
-                        <div class="sales-result">
+                        <div class="sales-table">
                             <h3>📆 Monthly Sales</h3>
                             <table>
                                 <thead>
                                     <tr>
                                         <th>Month</th>
-                                        <th>Total</th>
+                                        <th>Total Sales</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php
                                     $resMonth = $conn->query("SELECT SUM(total_price) AS total_sales_month, DATE_FORMAT(order_date, '%Y-%m') AS month FROM orders GROUP BY month ORDER BY month DESC");
-                                    while ($row = $resMonth->fetch_assoc()) {
-                                        echo "<tr>
-                                                <td>{$row['month']}</td>
-                                                <td>₱" . number_format($row['total_sales_month'], 2) . "</td>
-                                            </tr>";
+                                    if ($resMonth->num_rows > 0) {
+                                        while ($row = $resMonth->fetch_assoc()) {
+                                            echo "<tr><td>{$row['month']}</td><td>₱" . number_format($row['total_sales_month'], 2) . "</td></tr>";
+                                        }
+                                    } else {
+                                        echo "<tr><td colspan='2'>No monthly sales data.</td></tr>";
                                     }
                                     ?>
                                 </tbody>
@@ -263,51 +291,11 @@ if ($conn->connect_error) {
             </div>
 
             <div class="card">
-                <button class="collapsible">🛒 Customer Orders</button>
-                <div class="content-section" id="customerOrdersSection">
-                    <div class="sales-table">
-                        <h3>🧾 Order List</h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Order ID</th>
-                                    <th>User</th>
-                                    <th>Date</th>
-                                    <th>Items</th>
-                                    <th>Total Price</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php
-                                $orders = $conn->query("SELECT orders.id, users.username, orders.order_date, orders.total_price FROM orders JOIN users ON orders.user_id = users.id ORDER BY orders.order_date DESC");
-                                while ($row = $orders->fetch_assoc()) {
-                                    echo "<tr>
-                                            <td>{$row['id']}</td>
-                                            <td>{$row['username']}</td>
-                                            <td>{$row['order_date']}</td>
-                                            <td>";
+    🛒 Customer Orders
+    <br><br>
+    <a href="customer_orders.php" class="view-button">View</a>
+</div>
 
-                                    $order_id = $row['id'];
-                                    $items = $conn->query("SELECT product_name, quantity FROM order_items WHERE order_id = $order_id");
-                                    $item_list = [];
-                                    while ($item = $items->fetch_assoc()) {
-                                        $item_list[] = $item['product_name'] . ' (x' . $item['quantity'] . ')';
-                                    }
-                                    echo implode(', ', $item_list);
-
-                                    echo "</td>
-                                            <td>₱" . number_format($row['total_price'], 2) . "</td>
-                                        </tr>";
-                                }
-                                ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
 
     <script>
         var coll = document.getElementsByClassName("collapsible");
@@ -317,6 +305,11 @@ if ($conn->connect_error) {
                 var content = this.nextElementSibling;
                 content.classList.toggle("show");
             });
+        }
+
+        function toggleSales() {
+            var salesDiv = document.getElementById("salesContainer");
+            salesDiv.classList.toggle("show");
         }
     </script>
 </body>

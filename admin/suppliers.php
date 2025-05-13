@@ -12,7 +12,6 @@ if (!isset($_SESSION["user"])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Suppliers</title>
     <style>
-       
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; display: flex; height: 100vh; }
         .sidebar {
@@ -46,6 +45,7 @@ if (!isset($_SESSION["user"])) {
             width: calc(100% - 250px);
             background: #C7A061;
             min-height: 100vh;
+            padding: 20px;
         }
         .topbar {
             display: flex;
@@ -62,21 +62,30 @@ if (!isset($_SESSION["user"])) {
             border: none;
             width: 200px;
         }
-        .dashboard-content {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            padding: 20px;
+        h3 {
+            margin-top: 30px;
+            margin-bottom: 10px;
+            color: #4b3d23;
         }
-        .card {
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
             background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-            min-height: 150px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #8B6F3F;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1e2ca;
         }
     </style>
 </head>
@@ -94,16 +103,80 @@ if (!isset($_SESSION["user"])) {
         </ul>
         <a href="logout.php" class="logout">🚪 Logout</a>
     </div>
+
     <div class="content">
         <div class="topbar">
             <h2>🚚 Suppliers</h2>
             <input type="text" class="search-bar" placeholder="Search...">
         </div>
-        <div class="dashboard-content">
-            <div class="card">📋 Supplier List</div>
-            <div class="card">📝 Supplier Orders</div>
-            <div class="card">📦 Deliveries Received</div>
-        </div>
+
+        <h3>📋 Supplier List</h3>
+        <table>
+            <tr>
+                <th>Supplier Name</th>
+                <th>Contact Person</th>
+                <th>Phone / Email</th>
+                <th>Company Address</th>
+                <th>Products Supplied</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            <tr>
+                <td>Alpha Fabrics</td>
+                <td>Jane Reyes</td>
+                <td>0917-123-4567 / jane@alphafabrics.com</td>
+                <td>Pasig City</td>
+                <td>Textile, Buttons</td>
+                <td>Active</td>
+                <td>Edit | Delete</td>
+            </tr>
+        </table>
+
+        <h3>📝 Supplier Orders</h3>
+        <table>
+            <tr>
+                <th>Order ID</th>
+                <th>Supplier Name</th>
+                <th>Order Date</th>
+                <th>Items Ordered</th>
+                <th>Delivery Due Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+            <tr>
+                <td>ORD-0012</td>
+                <td>Alpha Fabrics</td>
+                <td>2025-05-10</td>
+                <td>50m Cotton Fabric</td>
+                <td>2025-05-15</td>
+                <td>Pending</td>
+                <td>View | Cancel</td>
+            </tr>
+        </table>
+
+        <h3>📦 Deliveries Received</h3>
+        <table>
+            <tr>
+                <th>Delivery ID</th>
+                <th>Supplier Name</th>
+                <th>Delivery Date</th>
+                <th>Items Received</th>
+                <th>Order Reference</th>
+                <th>Status</th>
+                <th>Received By</th>
+                <th>Actions</th>
+            </tr>
+            <tr>
+                <td>DEL-0105</td>
+                <td>Alpha Fabrics</td>
+                <td>2025-05-12</td>
+                <td>50m Cotton Fabric</td>
+                <td>ORD-0012</td>
+                <td>Complete</td>
+                <td>Junessa Mae</td>
+                <td>Confirm | Report Issue</td>
+            </tr>
+        </table>
     </div>
 </body>
 </html>
