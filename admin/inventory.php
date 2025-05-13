@@ -251,6 +251,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         </div>
     </div>
-
+    
+<script>
+    function toggleForm() {
+        const form = document.getElementById('productForm');
+        form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+</script>
 </body>
 </html>
