@@ -107,6 +107,19 @@ if (!isset($_SESSION["user"])) {
             font-weight: bold;
             min-height: 150px;
         }
+        .view-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #8B6F3F;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .view-button:hover {
+            background-color: #6e4c2f;
+        }
     </style>
 </head>
 <body>
@@ -131,7 +144,11 @@ if (!isset($_SESSION["user"])) {
         <div class="dashboard-content">
             <div class="card">🧾 Sales Overview</div>
             <div class="card">📅 Sales by Date</div>
-            <div class="card">🛒 Customer Orders</div>
+            <div class="card">
+                🛒 Customer Orders
+                <br><br>
+                <a href="customer_orders.php" class="view-button">View</a>
+            </div>
         </div>
     </div>
 </body>

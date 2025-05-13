@@ -5,12 +5,36 @@ if (!isset($_SESSION["user"])) {
     exit();
 }
 
-// Logout logic
-if (isset($_GET['logout'])) {
-    session_destroy();
-    header("Location: login.php");
-    exit();
+// 1) Database connection
+$host     = 'localhost';
+$dbUser   = 'root';            // XAMPP default
+$dbPass   = '';                // XAMPP default (blank)
+$dbName   = 'clothing_store';  // Your actual DB name
+
+$conn = new mysqli($host, $dbUser, $dbPass, $dbName);
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
+
+// 2) Fetch products
+$sql = "SELECT name, sizes, colors, brand, quantity, price
+        FROM products
+        ORDER BY name";
+$res = $conn->query($sql);
+$products = [];
+if ($res && $res->num_rows > 0) {
+    while ($row = $res->fetch_assoc()) {
+        $products[] = [
+            'name'     => $row['name'],
+            'sizes'    => json_decode($row['sizes'],  true),
+            'colors'   => json_decode($row['colors'], true),
+            'brand'    => $row['brand'],
+            'quantity' => (int)$row['quantity'],
+            'price'    => (float)$row['price'],
+        ];
+    }
+}
+$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -26,7 +50,6 @@ if (isset($_GET['logout'])) {
             height: 100vh;
             flex-direction: column;
         }
-
         .topbar {
             display: flex;
             justify-content: space-between;
@@ -35,151 +58,69 @@ if (isset($_GET['logout'])) {
             padding: 15px;
             color: white;
         }
-
-        .welcome {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
+        .welcome { font-size: 20px; font-weight: bold; }
         .sidebar {
-            width: 250px;
-            background: #8B6F3F;
-            color: white;
-            height: 100vh;
-            padding: 20px;
-            position: fixed;
-            left: 0;
-            top: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            width: 250px; background: #8B6F3F; color: white;
+            height: 100vh; padding: 20px; position: fixed; left: 0; top: 0;
+            display: flex; flex-direction: column; justify-content: space-between;
         }
-
-        .logo {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: white;
-            object-fit: cover;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-            margin-bottom: 20px;
-            align-self: center;
-        }
-
-        .content {
-            margin-left: 250px;
-            width: calc(100% - 250px);
-            background: #C7A061;
-            min-height: 100vh;
-            padding-top: 80px;
-        }
-
+        .logo { width: 120px; height: 120px; border-radius: 50%; background: white;
+                object-fit: cover; box-shadow: 0 0 10px rgba(0,0,0,0.2);
+                margin-bottom: 20px; align-self: center; }
         .profile-section {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: #8B6F3F;
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            width: 200px;
-            text-align: center;
+            position: absolute; top: 15px; left: 15px;
+            background: #8B6F3F; color: white; padding: 15px; border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 200px; text-align: center;
         }
-
-        .profile-section h3 {
-            margin-bottom: 10px;
-        }
-
         .profile-section button {
-            width: 100%;
-            background: #6b5430;
-            color: white;
-            border: none;
-            padding: 8px;
-            border-radius: 5px;
-            cursor: pointer;
+            width: 100%; background: #6b5430; color: white;
+            border: none; padding: 8px; border-radius: 5px; cursor: pointer;
         }
-
-        .profile-section button:hover {
-            background: #5a3e1b;
-        }
-
+        .profile-section button:hover { background: #5a3e1b; }
         .logo-section {
-            position: absolute;
-            top: 15px;
-            right: 15px;
+            position: absolute; top: 15px; right: 15px;
         }
-
-        .product-section {
-            padding: 20px;
+        .content {
+            margin-left: 250px; width: calc(100% - 250px);
+            background: #C7A061; min-height: 100vh; padding-top: 80px;
         }
-
-        h2 {
-            color: #5a3e1b;
-            margin-bottom: 20px;
-        }
-
+        .product-section { padding: 20px; }
+        h2 { color: #5a3e1b; margin-bottom: 20px; }
         .product-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
+            display: flex; flex-wrap: wrap; gap: 20px;
         }
-
         .product-card {
-            background: white;
-            padding: 15px;
-            width: 220px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background: white; padding: 15px; width: 220px;
+            border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-
         .product-card img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 10px;
+            width: 100%; height: 180px; object-fit: cover;
+            border-radius: 8px; margin-bottom: 10px;
         }
-
         .product-card h3 {
-            color: #5a3e1b;
-            margin: 10px 0 5px;
+            color: #5a3e1b; margin: 10px 0 5px;
         }
-
-        .product-card p {
-            margin: 5px 0;
-        }
-
+        .product-card p { margin: 5px 0; }
         .product-card select,
         .product-card input[type="number"] {
-            width: 100%;
-            padding: 5px;
-            margin-bottom: 10px;
+            width: 100%; padding: 5px; margin-bottom: 10px;
         }
-
         .product-card button {
-            width: 100%;
-            background: #8B6F3F;
-            color: white;
-            border: none;
-            padding: 8px;
-            border-radius: 5px;
-            cursor: pointer;
+            width: 100%; background: #8B6F3F; color: white;
+            border: none; padding: 8px; border-radius: 5px; cursor: pointer;
         }
-
-        .product-card button:hover {
-            background: #6b5430;
-        }
+        .product-card button:hover { background: #6b5430; }
     </style>
 </head>
 <body>
     <div class="topbar">
-        <div class="welcome">Welcome, <?php echo htmlspecialchars($_SESSION["user"]); ?>! 🛍️</div>
+        <div class="welcome">
+            Welcome, <?= htmlspecialchars($_SESSION["user"]) ?>! 🛍️
+        </div>
     </div>
 
     <div class="profile-section">
-        <h3><?php echo htmlspecialchars($_SESSION["user"]); ?>'s Profile</h3>
+        <h3><?= htmlspecialchars($_SESSION["user"]) ?>'s Profile</h3>
         <a href="orders.php"><button>My Orders</button></a>
     </div>
 
@@ -187,53 +128,51 @@ if (isset($_GET['logout'])) {
         <img src="logo.png" alt="Logo" class="logo">
     </div>
 
+    <div class="sidebar">
+        <div></div>
+        <a href="?logout" style="color:white; text-decoration:none; font-weight:bold;">
+            🚪 Logout
+        </a>
+    </div>
+
     <div class="content">
         <div class="product-section">
             <h2>Available Products</h2>
             <div class="product-grid">
-                <?php
-                $products = [
-                    ["T-Shirt", ["S", "M", "L"], ["Black", "White"], "Uniqlo", 50, 10],
-                    ["Jeans", ["28", "30", "32"], ["Blue", "Black"], "Levi's", 30, 25],
-                    ["Skirt", ["S", "M", "L"], ["Red", "Blue"], "Zara", 20, 15],
-                    ["Crop Top", ["XS", "S", "M", "XL", "XXL"], ["White", "Pink"], "H&M", 40, 12],
-                    ["Trouser", ["20", "30", "32", "34"], ["Gray", "Beige"], "Gap", 35, 20]
-                ];
-
-                foreach ($products as $item) {
-                    $productName = $item[0];
-                    $sizes = $item[1];
-                    $colors = $item[2];
-                    $brand = $item[3];
-                    $available = $item[4];
-                    $price = $item[5];
-
-                    $imageFile = strtolower(str_replace(' ', '-', $productName)) . ".jpg";
-
-                    echo "<div class='product-card'>";
-                    echo "<img src='images/$imageFile' alt='$productName'>";
-                    echo "<h3>$productName</h3>";
-                    echo "<p>Brand: $brand</p>";
-                    echo "<p>Available: $available</p>";
-                    echo "<p>Price: ₱" . number_format($price, 2) . "</p>";
-                    echo "<form method='POST' action='purchase.php'>";
-                    echo "<input type='hidden' name='product' value='$productName'>";
-                    echo "<input type='hidden' name='price' value='$price'>";
-                    echo "<label>Size:</label>";
-                    echo "<select name='size' required><option value=''>Select</option>";
-                    foreach ($sizes as $s) echo "<option value='$s'>$s</option>";
-                    echo "</select>";
-                    echo "<label>Color:</label>";
-                    echo "<select name='color' required><option value=''>Select</option>";
-                    foreach ($colors as $c) echo "<option value='$c'>$c</option>";
-                    echo "</select>";
-                    echo "<label>Quantity:</label>";
-                    echo "<input type='number' name='quantity' min='1' max='$available' required>";
-                    echo "<button type='submit'>Purchase</button>";
-                    echo "</form>";
-                    echo "</div>";
-                }
-                ?>
+              <?php foreach ($products as $item): 
+                  // skip items out of stock?
+                  if ($item['quantity'] < 1) continue;
+                  $img = 'images/' . strtolower(str_replace(' ', '-', $item['name'])) . '.jpg';
+              ?>
+                <div class="product-card">
+                    <img src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($item['name']) ?>">
+                    <h3><?= htmlspecialchars($item['name']) ?></h3>
+                    <p>Brand: <?= htmlspecialchars($item['brand']) ?></p>
+                    <p>Available: <?= $item['quantity'] ?></p>
+                    <p>Price: ₱<?= number_format($item['price'],2) ?></p>
+                    <form method="POST" action="purchase.php">
+                        <input type="hidden" name="product" value="<?= htmlspecialchars($item['name']) ?>">
+                        <input type="hidden" name="price"   value="<?= htmlspecialchars($item['price']) ?>">
+                        <label>Size:</label>
+                        <select name="size" required>
+                            <option value="">Select</option>
+                            <?php foreach ($item['sizes'] as $s): ?>
+                              <option><?= htmlspecialchars($s) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <label>Color:</label>
+                        <select name="color" required>
+                            <option value="">Select</option>
+                            <?php foreach ($item['colors'] as $c): ?>
+                              <option><?= htmlspecialchars($c) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <label>Quantity:</label>
+                        <input type="number" name="quantity" min="1" max="<?= $item['quantity'] ?>" required>
+                        <button type="submit">Purchase</button>
+                    </form>
+                </div>
+              <?php endforeach; ?>
             </div>
         </div>
     </div>

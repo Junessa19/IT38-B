@@ -9,7 +9,7 @@ if (!isset($_SESSION["admin"])) {
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "your_database_name";  // Replace with your database name
+$dbname = "clothing_store";  // Replace with your database name
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
