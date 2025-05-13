@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             margin-left: 250px;
             width: calc(100% - 250px);
             background: #C7A061;
-            min-height: 100vh;
+            min-height: 220vh;
         }
 
         .topbar {
