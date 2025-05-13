@@ -4,6 +4,12 @@ if (!isset($_SESSION["user"])) {
     header("Location: login.php");
     exit();
 }
+
+include '../user/db.php';
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -12,7 +18,6 @@ if (!isset($_SESSION["user"])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales</title>
     <style>
-        /* [Same styles as in inventory.php] */
         * {
             margin: 0;
             padding: 0;
@@ -120,6 +125,35 @@ if (!isset($_SESSION["user"])) {
         .view-button:hover {
             background-color: #6e4c2f;
         }
+
+      
+        .collapsible {
+            cursor: pointer;
+            padding: 10px;
+            background-color: #8B6F3F;
+            color: white;
+            border: none;
+            width: 100%;
+            text-align: left;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+
+        .collapsible:after {
+            content: ' ▼';
+            float: right;
+        }
+
+        .active:after {
+            content: ' ▲';
+        }
+
+        .content-section {
+            display: none;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -142,8 +176,40 @@ if (!isset($_SESSION["user"])) {
             <input type="text" class="search-bar" placeholder="Search...">
         </div>
         <div class="dashboard-content">
-            <div class="card">🧾 Sales Overview</div>
-            <div class="card">📅 Sales by Date</div>
+            <div class="card">
+                <button class="collapsible">🧾 Sales Overview</button>
+                <div class="content-section">
+                    <?php
+                    $res1 = $conn->query("SELECT SUM(total_price) AS total_sales FROM orders");
+                    if ($res1->num_rows > 0) {
+                        $data1 = $res1->fetch_assoc();
+                        $total_sales = $data1['total_sales'] ?? 0;
+                        echo "Total Sales: ₱" . number_format($total_sales, 2);
+                    } else {
+                        echo "Error retrieving sales data.";
+                    }
+                    ?>
+                </div>
+            </div>
+
+            
+            <div class="card">
+                <button class="collapsible">📅 Sales by Date</button>
+                <div class="content-section">
+                    <?php
+                    $res2 = $conn->query("SELECT SUM(total_price) AS total_sales_by_date, DATE(order_date) AS order_date FROM orders GROUP BY order_date");
+                    if ($res2->num_rows > 0) {
+                        while ($data2 = $res2->fetch_assoc()) {
+                            echo "<br>Date: " . $data2['order_date'] . " - ₱" . number_format($data2['total_sales_by_date'], 2);
+                        }
+                    } else {
+                        echo "No sales data by date.";
+                    }
+                    ?>
+                </div>
+            </div>
+
+         
             <div class="card">
                 🛒 Customer Orders
                 <br><br>
@@ -151,5 +217,21 @@ if (!isset($_SESSION["user"])) {
             </div>
         </div>
     </div>
+
+    <script>
+        // JavaScript to toggle collapsible content visibility
+        var coll = document.getElementsByClassName("collapsible");
+        for (var i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.display === "block") {
+                    content.style.display = "none";
+                } else {
+                    content.style.display = "block";
+                }
+            });
+        }
+    </script>
 </body>
 </html>

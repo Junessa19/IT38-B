@@ -22,7 +22,9 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT name, sizes, colors, brand, quantity, price FROM products ORDER BY name";
+$sql = "SELECT name, sizes, colors, brand, quantity, price
+        FROM products
+        ORDER BY name";
 $res = $conn->query($sql);
 $products = [];
 if ($res && $res->num_rows > 0) {
@@ -65,18 +67,7 @@ $conn->close();
             font-size: 20px;
             font-weight: bold;
         }
-        .topbar-buttons button.orders-button {
-            background: white;
-            color: #8B6F3F;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .topbar-buttons button.orders-button:hover {
-            background: #f2e2c6;
-        }
+
         .sidebar {
             width: 250px;
             background: #8B6F3F;
@@ -88,25 +79,41 @@ $conn->close();
             top: 0;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            align-items: center;
         }
+
         .logo {
-            position: fixed;
-            top: 20px;
-            left: 20px;
             width: 120px;
             height: 120px;
             border-radius: 50%;
             background: white;
             object-fit: cover;
             box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            z-index: 1000;
+            margin-bottom: 15px;
         }
-        .logo-section {
-            position: absolute;
-            top: 15px;
-            right: 15px;
+
+        .orders-button {
+            background: white;
+            color: #8B6F3F;
+            padding: 8px 12px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: inline-block;
         }
+
+        .orders-button:hover {
+            background: #f0e0c0;
+        }
+
+        .logout-link {
+            margin-top: auto;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
         .content {
             margin-left: 250px;
             width: calc(100% - 250px);
@@ -114,55 +121,70 @@ $conn->close();
             min-height: 280vh;
             padding-top: 80px;
         }
+
         .product-section { padding: 20px; }
         h2 { color: #5a3e1b; margin-bottom: 20px; }
+
         .product-grid {
-            display: flex; flex-wrap: wrap; gap: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
         }
+
         .product-card {
-            background: white; padding: 15px; width: 220px;
-            border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background: white;
+            padding: 15px;
+            width: 220px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
+
         .product-card img {
-            width: 100%; height: 180px; object-fit: cover;
-            border-radius: 8px; margin-bottom: 10px;
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
         }
+
         .product-card h3 {
-            color: #5a3e1b; margin: 10px 0 5px;
+            color: #5a3e1b;
+            margin: 10px 0 5px;
         }
+
         .product-card p { margin: 5px 0; }
+
         .product-card select,
         .product-card input[type="number"] {
-            width: 100%; padding: 5px; margin-bottom: 10px;
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 10px;
         }
+
         .product-card button {
-            width: 100%; background: #8B6F3F; color: white;
-            border: none; padding: 8px; border-radius: 5px; cursor: pointer;
+            width: 100%;
+            background: #8B6F3F;
+            color: white;
+            border: none;
+            padding: 8px;
+            border-radius: 5px;
+            cursor: pointer;
         }
+
         .product-card button:hover { background: #6b5430; }
     </style>
 </head>
 <body>
-    
-  <div class="topbar">
-    <div class="topbar-left">
+    <div class="topbar">
         <div class="welcome">
             Welcome, <?= htmlspecialchars($_SESSION["user"]) ?>! 🛍️
         </div>
-        <a href="orders.php" class="orders-button">My Orders</a>
-    </div>
-</div>
-
-
-    <div class="logo-section">
-        <img src="logo.png" alt="Logo" class="logo">
     </div>
 
     <div class="sidebar">
-        <div></div>
-        <a href="?logout" style="color:white; text-decoration:none; font-weight:bold;">
-            🚪 Logout
-        </a>
+        <img src="logo.png" alt="Logo" class="logo">
+        <a href="orders.php" class="orders-button">My Orders</a>
+        <a href="?logout" class="logout-link">🚪 Logout</a>
     </div>
 
     <div class="content">
