@@ -1,10 +1,6 @@
 <?php
 session_start();
-// Uncomment this if login system is active
-// if (!isset($_SESSION["user"])) {
-//     header("Location: login.php");
-//     exit();
-// Assuming `$products` is in a database or session, for now, it's still static
+
 $products = [
     ["T-Shirt", ["S", "M", "L"], ["Black", "White"], "Uniqlo", 50, 10],
     ["Jeans", ["28", "30", "32"], ["Blue", "Black"], "Levi's", 30, 25],
@@ -26,41 +22,36 @@ $products = [
     ["Overalls", ["S", "M", "L"], ["Blue", "Dark Blue"], "Gap", 4, 42],
     ["Raincoat", ["S", "M", "L"], ["Yellow", "Transparent"], "Uniqlo", 2, 36],
     ["Kimono", ["One Size"], ["Pink", "Floral"], "Japan Style", 7, 38],
-    // New product added here:
     ["New Product", ["S", "M", "L"], ["Color1", "Color2"], "Brand Name", 10, 20]
 ];
 
 
-// Handling Add, Edit, and Delete Product operations
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Add Product
     if (isset($_POST['add_product'])) {
-        $name = $_POST['name'];
-        $sizes = explode(",", $_POST['sizes']);
-        $colors = explode(",", $_POST['colors']);
-        $brand = $_POST['brand'];
-        $quantity = $_POST['quantity'];
-        $price = $_POST['price'];
-        $products[] = [$name, $sizes, $colors, $brand, $quantity, $price];
+        $products[] = [
+            $_POST['name'],
+            explode(",", $_POST['sizes']),
+            explode(",", $_POST['colors']),
+            $_POST['brand'],
+            $_POST['quantity'],
+            $_POST['price']
+        ];
     }
 
-    // Edit Product
     if (isset($_POST['edit_product'])) {
-        $index = $_POST['index'];
-        $name = $_POST['name'];
-        $sizes = explode(",", $_POST['sizes']);
-        $colors = explode(",", $_POST['colors']);
-        $brand = $_POST['brand'];
-        $quantity = $_POST['quantity'];
-        $price = $_POST['price'];
-        $products[$index] = [$name, $sizes, $colors, $brand, $quantity, $price];
+        $products[$_POST['index']] = [
+            $_POST['name'],
+            explode(",", $_POST['sizes']),
+            explode(",", $_POST['colors']),
+            $_POST['brand'],
+            $_POST['quantity'],
+            $_POST['price']
+        ];
     }
 
-    // Delete Product
     if (isset($_POST['delete_product'])) {
-        $index = $_POST['index'];
-        unset($products[$index]);
-        $products = array_values($products); // Reindex the array
+        unset($products[$_POST['index']]);
+        $products = array_values($products);
     }
 }
 ?>
@@ -69,54 +60,98 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>StockHub Dashboard</title>
+    <title>StockHub Inventory Sidebar</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .sidebar {
+            position: fixed;
+            right: -100%;
+            top: 0;
+            width: 70%;
+            height: 100%;
+            background-color: #f9f9f9;
+            overflow-y: auto;
+            transition: right 0.4s ease-in-out;
+            padding: 20px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+            z-index: 999;
+        }
+
+        .sidebar.show {
+            right: 0;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            font-family: Arial, sans-serif;
+            margin-top: 10px;
         }
+
         th, td {
             border: 1px solid #ccc;
             padding: 10px;
             text-align: left;
         }
+
         select, input {
             padding: 5px;
+            margin-top: 5px;
         }
+
         .out-of-stock {
             color: red;
             font-weight: bold;
         }
-        .back-button {
-            padding: 10px 15px;
-            background-color: #007bff;
+
+        .form-container {
+            margin: 20px 0;
+        }
+
+        .inventory-button {
+            margin: 20px;
+            padding: 12px 20px;
+            background-color: #28a745;
             color: white;
             border: none;
             font-size: 16px;
             cursor: pointer;
         }
-        .back-button:hover {
-            background-color: #0056b3;
+
+        .inventory-button:hover {
+            background-color: #218838;
         }
-        .form-container {
-            margin: 20px 0;
+
+        .close-button {
+            float: right;
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <h2>Available Products</h2>
-    
-    <!-- Back Button -->
-    <button class="back-button" onclick="window.history.back()">Go Back</button>
+
+
+<button class="inventory-button" onclick="toggleSidebar()">Show Inventory</button>
+
+
+<div id="inventorySidebar" class="sidebar">
+    <button class="close-button" onclick="toggleSidebar()">X</button>
+    <h2>Inventory Panel</h2>
 
     <table>
         <thead>
             <tr>
                 <th>Product</th>
                 <th>Brand</th>
-                <th>Available Sizes</th>
-                <th>Available Colors</th>
+                <th>Sizes</th>
+                <th>Colors</th>
                 <th>Quantity</th>
                 <th>Price (₱)</th>
                 <th>Actions</th>
@@ -124,51 +159,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </thead>
         <tbody>
             <?php foreach ($products as $index => $item): ?>
-            <tr data-product-index="<?= $index ?>">
-                <td><?= htmlspecialchars($item[0]) ?></td>
-                <td><?= htmlspecialchars($item[3]) ?></td>
-                <td>
-                    <select class="size-dropdown">
-                        <?php foreach ($item[1] as $size): ?>
-                            <option value="<?= htmlspecialchars($size) ?>"><?= htmlspecialchars($size) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </td>
-                <td>
-                    <select class="color-dropdown">
-                        <?php foreach ($item[2] as $color): ?>
-                            <option value="<?= htmlspecialchars($color) ?>"><?= htmlspecialchars($color) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </td>
-                <td class="<?= $item[4] <= 0 ? 'out-of-stock' : '' ?>">
-                    <?= $item[4] <= 0 ? 'Out of Stock' : $item[4] ?>
-                </td>
-                <td>₱<?= number_format($item[5], 2) ?></td>
-                <td>
-                    <!-- Edit Product Button -->
-                    <form method="POST" style="display:inline;">
-                        <input type="hidden" name="index" value="<?= $index ?>">
-                        <input type="text" name="name" value="<?= htmlspecialchars($item[0]) ?>" required>
-                        <input type="text" name="sizes" value="<?= implode(",", $item[1]) ?>" required>
-                        <input type="text" name="colors" value="<?= implode(",", $item[2]) ?>" required>
-                        <input type="text" name="brand" value="<?= htmlspecialchars($item[3]) ?>" required>
-                        <input type="number" name="quantity" value="<?= $item[4] ?>" required>
-                        <input type="number" step="0.01" name="price" value="<?= $item[5] ?>" required>
-                        <button type="submit" name="edit_product">Edit</button>
-                    </form>
-                    <!-- Delete Product Button -->
-                    <form method="POST" style="display:inline;">
-                        <input type="hidden" name="index" value="<?= $index ?>">
-                        <button type="submit" name="delete_product" onclick="return confirm('Are you sure you want to delete this product?')">Delete</button>
-                    </form>
-                </td>
-            </tr>
+                <tr>
+                    <td><?= htmlspecialchars($item[0]) ?></td>
+                    <td><?= htmlspecialchars($item[3]) ?></td>
+                    <td>
+                        <select>
+                            <?php foreach ($item[1] as $size): ?>
+                                <option><?= htmlspecialchars($size) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                    <td>
+                        <select>
+                            <?php foreach ($item[2] as $color): ?>
+                                <option><?= htmlspecialchars($color) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                    <td class="<?= $item[4] <= 0 ? 'out-of-stock' : '' ?>">
+                        <?= $item[4] <= 0 ? 'Out of Stock' : $item[4] ?>
+                    </td>
+                    <td>₱<?= number_format($item[5], 2) ?></td>
+                    <td>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="index" value="<?= $index ?>">
+                            <input type="text" name="name" value="<?= htmlspecialchars($item[0]) ?>" required>
+                            <input type="text" name="sizes" value="<?= implode(",", $item[1]) ?>" required>
+                            <input type="text" name="colors" value="<?= implode(",", $item[2]) ?>" required>
+                            <input type="text" name="brand" value="<?= htmlspecialchars($item[3]) ?>" required>
+                            <input type="number" name="quantity" value="<?= $item[4] ?>" required>
+                            <input type="number" step="0.01" name="price" value="<?= $item[5] ?>" required>
+                            <button type="submit" name="edit_product">Edit</button>
+                        </form>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="index" value="<?= $index ?>">
+                            <button type="submit" name="delete_product" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
 
-    <!-- Add Product Form -->
     <div class="form-container">
         <h3>Add New Product</h3>
         <form method="POST">
@@ -181,22 +213,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <button type="submit" name="add_product">Add Product</button>
         </form>
     </div>
+</div>
 
 <script>
-    const productData = <?php
-        $data = [];
-        foreach ($products as $index => $item) {
-            $data["product_$index"] = [
-                'sizes' => $item[1],
-                'colors' => $item[2],
-                'qty' => $item[4],
-                'price' => $item[5]
-            ];
-        }
-        echo json_encode($data, JSON_PRETTY_PRINT);
-    ?>;
-
-    console.log(productData); // You can inspect in browser dev tools
+    function toggleSidebar() {
+        const sidebar = document.getElementById('inventorySidebar');
+        sidebar.classList.toggle('show');
+    }
 </script>
 
 </body>
