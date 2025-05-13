@@ -1,6 +1,11 @@
 <?php
 session_start();
 
+// if (!isset($_SESSION["user"])) {
+//     header("Location: login.php");
+//     exit();
+// }
+
 $products = [
     ["T-Shirt", ["S", "M", "L"], ["Black", "White"], "Uniqlo", 50, 10],
     ["Jeans", ["28", "30", "32"], ["Blue", "Black"], "Levi's", 30, 25],
@@ -25,32 +30,31 @@ $products = [
     ["New Product", ["S", "M", "L"], ["Color1", "Color2"], "Brand Name", 10, 20]
 ];
 
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['add_product'])) {
-        $products[] = [
-            $_POST['name'],
-            explode(",", $_POST['sizes']),
-            explode(",", $_POST['colors']),
-            $_POST['brand'],
-            $_POST['quantity'],
-            $_POST['price']
-        ];
+        $name = $_POST['name'];
+        $sizes = explode(",", $_POST['sizes']);
+        $colors = explode(",", $_POST['colors']);
+        $brand = $_POST['brand'];
+        $quantity = $_POST['quantity'];
+        $price = $_POST['price'];
+        $products[] = [$name, $sizes, $colors, $brand, $quantity, $price];
     }
 
     if (isset($_POST['edit_product'])) {
-        $products[$_POST['index']] = [
-            $_POST['name'],
-            explode(",", $_POST['sizes']),
-            explode(",", $_POST['colors']),
-            $_POST['brand'],
-            $_POST['quantity'],
-            $_POST['price']
-        ];
+        $index = $_POST['index'];
+        $name = $_POST['name'];
+        $sizes = explode(",", $_POST['sizes']);
+        $colors = explode(",", $_POST['colors']);
+        $brand = $_POST['brand'];
+        $quantity = $_POST['quantity'];
+        $price = $_POST['price'];
+        $products[$index] = [$name, $sizes, $colors, $brand, $quantity, $price];
     }
 
     if (isset($_POST['delete_product'])) {
-        unset($products[$_POST['index']]);
+        $index = $_POST['index'];
+        unset($products[$index]);
         $products = array_values($products);
     }
 }
@@ -60,35 +64,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>StockHub Inventory Sidebar</title>
+    <title>Inventory | StockHub</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; display: flex; height: 100vh; }
 
         .sidebar {
-            position: fixed;
-            right: -100%;
-            top: 0;
-            width: 70%;
-            height: 100%;
-            background-color: #f9f9f9;
-            overflow-y: auto;
-            transition: right 0.4s ease-in-out;
+            width: 250px;
+            background: #8B6F3F;
+            color: white;
+            height: 100vh;
             padding: 20px;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.2);
-            z-index: 999;
+            position: fixed;
+            left: 0;
+            top: 0;
         }
 
-        .sidebar.show {
-            right: 0;
+        .logo-container { display: flex; align-items: center; gap: 10px; }
+        .logo { width: 70px; height: 70px; border-radius: 50%; background: white; object-fit: cover; }
+        .menu { list-style: none; padding: 20px 0; }
+        .menu li { margin: 15px 0; }
+        .menu a {
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            padding: 8px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .menu a:hover { background: rgba(255, 255, 255, 0.2); }
+        .logout { margin-top: 30px; font-weight: bold; }
+
+        .content {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            background: #C7A061;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #8B6F3F;
+            padding: 15px;
+            color: white;
+        }
+
+        .search-bar {
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            width: 200px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            font-family: Arial, sans-serif;
         }
 
         th, td {
@@ -99,7 +134,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         select, input {
             padding: 5px;
-            margin-top: 5px;
         }
 
         .out-of-stock {
@@ -107,120 +141,140 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-weight: bold;
         }
 
-        .form-container {
-            margin: 20px 0;
-        }
-
-        .inventory-button {
-            margin: 20px;
-            padding: 12px 20px;
-            background-color: #28a745;
+        .back-button {
+            padding: 10px 15px;
+            background-color: #007bff;
             color: white;
             border: none;
             font-size: 16px;
             cursor: pointer;
         }
 
-        .inventory-button:hover {
-            background-color: #218838;
+        .back-button:hover {
+            background-color: #0056b3;
         }
 
-        .close-button {
-            float: right;
-            background-color: red;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            cursor: pointer;
+        .form-container {
+            margin: 20px 0;
+        }
+
+        .inventory-section {
+            padding: 20px;
         }
     </style>
 </head>
 <body>
 
-
-<button class="inventory-button" onclick="toggleSidebar()">Show Inventory</button>
-
-
-<div id="inventorySidebar" class="sidebar">
-    <button class="close-button" onclick="toggleSidebar()">X</button>
-    <h2>Inventory Panel</h2>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Product</th>
-                <th>Brand</th>
-                <th>Sizes</th>
-                <th>Colors</th>
-                <th>Quantity</th>
-                <th>Price (₱)</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($products as $index => $item): ?>
-                <tr>
-                    <td><?= htmlspecialchars($item[0]) ?></td>
-                    <td><?= htmlspecialchars($item[3]) ?></td>
-                    <td>
-                        <select>
-                            <?php foreach ($item[1] as $size): ?>
-                                <option><?= htmlspecialchars($size) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </td>
-                    <td>
-                        <select>
-                            <?php foreach ($item[2] as $color): ?>
-                                <option><?= htmlspecialchars($color) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </td>
-                    <td class="<?= $item[4] <= 0 ? 'out-of-stock' : '' ?>">
-                        <?= $item[4] <= 0 ? 'Out of Stock' : $item[4] ?>
-                    </td>
-                    <td>₱<?= number_format($item[5], 2) ?></td>
-                    <td>
-                        <form method="POST" style="display:inline;">
-                            <input type="hidden" name="index" value="<?= $index ?>">
-                            <input type="text" name="name" value="<?= htmlspecialchars($item[0]) ?>" required>
-                            <input type="text" name="sizes" value="<?= implode(",", $item[1]) ?>" required>
-                            <input type="text" name="colors" value="<?= implode(",", $item[2]) ?>" required>
-                            <input type="text" name="brand" value="<?= htmlspecialchars($item[3]) ?>" required>
-                            <input type="number" name="quantity" value="<?= $item[4] ?>" required>
-                            <input type="number" step="0.01" name="price" value="<?= $item[5] ?>" required>
-                            <button type="submit" name="edit_product">Edit</button>
-                        </form>
-                        <form method="POST" style="display:inline;">
-                            <input type="hidden" name="index" value="<?= $index ?>">
-                            <button type="submit" name="delete_product" onclick="return confirm('Are you sure?')">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-
-    <div class="form-container">
-        <h3>Add New Product</h3>
-        <form method="POST">
-            <input type="text" name="name" placeholder="Product Name" required><br>
-            <input type="text" name="sizes" placeholder="Sizes (comma-separated)" required><br>
-            <input type="text" name="colors" placeholder="Colors (comma-separated)" required><br>
-            <input type="text" name="brand" placeholder="Brand" required><br>
-            <input type="number" name="quantity" placeholder="Quantity" required><br>
-            <input type="number" step="0.01" name="price" placeholder="Price" required><br>
-            <button type="submit" name="add_product">Add Product</button>
-        </form>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo-container">
+            <img src="logo.png" alt="Logo" class="logo">
+        </div>
+        <ul class="menu">
+            <li><a href="dashboard.php">🏠 Home</a></li>
+            <li><a href="inventory.php">📦 Inventory</a></li>
+            <li><a href="sales.php">📈 Sales</a></li>
+            <li><a href="suppliers.php">🚚 Suppliers</a></li>
+            <li><a href="reports.php">📊 Reports</a></li>
+        </ul>
+        <a href="logout.php" class="logout">🚪 Logout</a>
     </div>
-</div>
 
-<script>
-    function toggleSidebar() {
-        const sidebar = document.getElementById('inventorySidebar');
-        sidebar.classList.toggle('show');
-    }
-</script>
+    <!-- Main Content -->
+    <div class="content">
+        <div class="topbar">
+            <h2>📦 Inventory</h2>
+            <input type="text" class="search-bar" placeholder="Search Products...">
+        </div>
 
+        <div class="inventory-section">
+            <button class="back-button" onclick="window.history.back()">Go Back</button>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Brand</th>
+                        <th>Sizes</th>
+                        <th>Colors</th>
+                        <th>Quantity</th>
+                        <th>Price (₱)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($products as $index => $item): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($item[0]) ?></td>
+                        <td><?= htmlspecialchars($item[3]) ?></td>
+                        <td>
+                            <select>
+                                <?php foreach ($item[1] as $size): ?>
+                                    <option><?= htmlspecialchars($size) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                        <td>
+                            <select>
+                                <?php foreach ($item[2] as $color): ?>
+                                    <option><?= htmlspecialchars($color) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                        <td class="<?= $item[4] <= 0 ? 'out-of-stock' : '' ?>">
+                            <?= $item[4] <= 0 ? 'Out of Stock' : $item[4] ?>
+                        </td>
+                        <td>₱<?= number_format($item[5], 2) ?></td>
+                        <td>
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="index" value="<?= $index ?>">
+                                <input type="text" name="name" value="<?= htmlspecialchars($item[0]) ?>" required>
+                                <input type="text" name="sizes" value="<?= implode(",", $item[1]) ?>" required>
+                                <input type="text" name="colors" value="<?= implode(",", $item[2]) ?>" required>
+                                <input type="text" name="brand" value="<?= htmlspecialchars($item[3]) ?>" required>
+                                <input type="number" name="quantity" value="<?= $item[4] ?>" required>
+                                <input type="number" step="0.01" name="price" value="<?= $item[5] ?>" required>
+                                <button type="submit" name="edit_product">Edit</button>
+                            </form>
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="index" value="<?= $index ?>">
+                                <button type="submit" name="delete_product" onclick="return confirm('Delete this product?')">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+
+            <div class="form-container">
+                <h3>Add New Product</h3>
+                <form method="POST">
+                    <input type="text" name="name" placeholder="Product Name" required><br>
+                    <input type="text" name="sizes" placeholder="Sizes (comma-separated)" required><br>
+                    <input type="text" name="colors" placeholder="Colors (comma-separated)" required><br>
+                    <input type="text" name="brand" placeholder="Brand" required><br>
+                    <input type="number" name="quantity" placeholder="Quantity" required><br>
+                    <input type="number" step="0.01" name="price" placeholder="Price" required><br>
+                    <button type="submit" name="add_product">Add Product</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const productData = <?php
+            $data = [];
+            foreach ($products as $index => $item) {
+                $data["product_$index"] = [
+                    'sizes' => $item[1],
+                    'colors' => $item[2],
+                    'qty' => $item[4],
+                    'price' => $item[5]
+                ];
+            }
+            echo json_encode($data, JSON_PRETTY_PRINT);
+        ?>;
+        console.log(productData);
+    </script>
 </body>
 </html>
