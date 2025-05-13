@@ -197,28 +197,31 @@ $products = [
                     <h3><?= htmlspecialchars($item[0]) ?></h3>
                     <p>Brand: <?= htmlspecialchars($item[3]) ?></p>
                     <p>Available: <?= $item[4] ?></p>
-                    <p>Price: ₱<?= number_format($item[5],2) ?></p>
-                    <form method="POST" action="purchase.php">
-                        <input type="hidden" name="product" value="<?= htmlspecialchars($item[0]) ?>">
-                        <input type="hidden" name="price"   value="<?= htmlspecialchars($item[5]) ?>">
-                        <label>Size:</label>
-                        <select name="size" required>
-                            <option value="">Select</option>
-                            <?php foreach ($item[1] as $size): ?>
-                              <option><?= htmlspecialchars($size) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <label>Color:</label>
-                        <select name="color" required>
-                            <option value="">Select</option>
-                            <?php foreach ($item[2] as $color): ?>
-                              <option><?= htmlspecialchars($color) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <label>Quantity:</label>
-                        <input type="number" name="quantity" min="1" max="<?= $item[4] ?>" required>
-                        <button type="submit">Purchase</button>
-                    </form>
+                    <p>Price: ₱<?= number_format($item[5],2) 
+                    ?></p>
+
+                  <form method="POST" action="purchase.php">
+    <input type="hidden" name="product" value="<?= htmlspecialchars($item[0]) ?>">
+    <input type="hidden" name="price" value="<?= htmlspecialchars($item[5]) ?>">
+    <label>Size:</label>
+    <select name="size" required>
+        <option value="">Select</option>
+        <?php foreach ($item[1] as $size): ?>
+            <option><?= htmlspecialchars($size) ?></option>
+        <?php endforeach; ?>
+    </select>
+    <label>Color:</label>
+    <select name="color" required>
+        <option value="">Select</option>
+        <?php foreach ($item[2] as $color): ?>
+            <option><?= htmlspecialchars($color) ?></option>
+        <?php endforeach; ?>
+    </select>
+    <label>Quantity:</label>
+    <input type="number" name="quantity" min="1" max="<?= $item[4] ?>" required>
+    <button type="submit">Purchase</button>
+</form>
+
                 </div>
               <?php endforeach; ?>
             </div>
