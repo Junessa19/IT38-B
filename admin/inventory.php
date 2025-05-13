@@ -197,7 +197,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <li><a href="inventory.php">📦 Inventory</a></li>
             <li><a href="sales.php">📈 Sales</a></li>
             <li><a href="suppliers.php">🚚 Suppliers</a></li>
-            <li><a href="reports.php">📊 Reports</a></li>
         </ul>
         <a href="logout.php" class="logout">🚪 Logout</a>
     </div>
@@ -270,13 +269,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="text" name="colors" placeholder="Colors (comma-separated)" required><br>
                     <input type="text" name="brand" placeholder="Brand" required><br>
                     <input type="number" name="quantity" placeholder="Quantity" required><br>
-                    <input type="number" step="0.01" name="price" placeholder="Price" required><br>
-                    <button type="submit" name="add_product">Add Product</button>
-                </form>
-            </div>
-
-        </div>
-    </div>
-
-</body>
-</html>
+                   

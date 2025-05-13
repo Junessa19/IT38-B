@@ -99,7 +99,6 @@ if (!isset($_SESSION["user"])) {
             <li><a href="inventory.php">📦 Inventory</a></li>
             <li><a href="sales.php">📈 Sales</a></li>
             <li><a href="suppliers.php">🚚 Suppliers</a></li>
-            <li><a href="reports.php">📊 Reports</a></li>
         </ul>
         <a href="logout.php" class="logout">🚪 Logout</a>
     </div>
