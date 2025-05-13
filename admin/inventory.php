@@ -1,10 +1,7 @@
 <?php
 session_start();
 
-// if (!isset($_SESSION["user"])) {
-//     header("Location: login.php");
-//     exit();
-// }
+
 
 $products = [
     ["T-Shirt", ["S", "M", "L"], ["Black", "White"], "Uniqlo", 50, 10],
@@ -165,7 +162,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 
-  
     <div class="sidebar">
         <div class="logo-container">
             <img src="logo.png" alt="Logo" class="logo">
@@ -224,24 +220,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?= $item[4] <= 0 ? 'Out of Stock' : $item[4] ?>
                         </td>
                         <td>₱<?= number_format($item[5], 2) ?></td>
-                       <td>
-    <form method="POST" style="display:inline;">
-        <input type="hidden" name="index" value="<?= $index ?>">
-        <input type="text" name="name" value="<?= htmlspecialchars($item[0]) ?>" required>
-        <input type="text" name="sizes" value="<?= implode(",", $item[1]) ?>" required>
-        <input type="text" name="colors" value="<?= implode(",", $item[2]) ?>" required>
-        <input type="text" name="brand" value="<?= htmlspecialchars($item[3]) ?>" required>
-        <input type="number" name="quantity" value="<?= $item[4] ?>" required>
-        <input type="number" step="0.01" name="price" value="<?= $item[5] ?>" required>
-      
-        <a href="?edit=<?= $index ?>" style="color: blue; text-decoration: none; padding: 8px 16px; background-color: #f0f0f0; border-radius: 5px;">Edit</a>
-    </form>
-    <form method="POST" style="display:inline;">
-        <input type="hidden" name="index" value="<?= $index ?>">
-        <button type="submit" name="delete_product" onclick="return confirm('Delete this product?')">Delete</button>
-    </form>
-</td>
-
+                        <td>
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="index" value="<?= $index ?>">
+                                <button type="submit" name="edit_product">Edit</button>
+                            </form>
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="index" value="<?= $index ?>">
+                                <button type="submit" name="delete_product" onclick="return confirm('Delete this product?')">Delete</button>
+                            </form>
+                        </td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -262,20 +250,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
-    <script>
-        const productData = <?php
-            $data = [];
-            foreach ($products as $index => $item) {
-                $data["product_$index"] = [
-                    'sizes' => $item[1],
-                    'colors' => $item[2],
-                    'qty' => $item[4],
-                    'price' => $item[5]
-                ];
-            }
-            echo json_encode($data, JSON_PRETTY_PRINT);
-        ?>;
-        console.log(productData);
-    </script>
 </body>
 </html>
