@@ -1,6 +1,10 @@
 <?php
 session_start();
-
+// Uncomment this if login system is active
+// if (!isset($_SESSION["user"])) {
+//     header("Location: login.php");
+//     exit();
+// }
 
 $products = [
     ["T-Shirt", ["S", "M", "L"], ["Black", "White"], "Uniqlo", 50, 10],
@@ -49,10 +53,25 @@ $products = [
             color: red;
             font-weight: bold;
         }
+        .back-button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .back-button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
     <h2>Available Products</h2>
+    
+    <!-- Back Button -->
+    <button class="back-button" onclick="window.history.back()">Go Back</button>
+
     <table>
         <thead>
             <tr>
