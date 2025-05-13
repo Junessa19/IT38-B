@@ -1,8 +1,6 @@
 <?php
 session_start();
 
-
-
 $products = [
     ["T-Shirt", ["S", "M", "L"], ["Black", "White"], "Uniqlo", 50, 10],
     ["Jeans", ["28", "30", "32"], ["Blue", "Black"], "Levi's", 30, 25],
@@ -138,125 +136,133 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-weight: bold;
         }
 
-        .back-button {
-            padding: 10px 15px;
+        .form-container {
+            margin-top: 30px;
+        }
+
+        .toggle-form-button {
+            margin: 30px 0 10px 0;
+            padding: 12px 20px;
             background-color: #007bff;
             color: white;
             border: none;
             font-size: 16px;
+            border-radius: 5px;
             cursor: pointer;
         }
 
-        .back-button:hover {
+        .toggle-form-button:hover {
             background-color: #0056b3;
         }
 
-        .form-container {
-            margin: 20px 0;
+        #productForm {
+            display: none;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
         }
 
         .inventory-section {
             padding: 20px;
         }
     </style>
+    <script>
+        function toggleForm() {
+            const form = document.getElementById('productForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
 </head>
 <body>
 
-    <div class="sidebar">
-        <div class="logo-container">
-            <img src="logo.png" alt="Logo" class="logo">
-        </div>
-        <ul class="menu">
-            <li><a href="dashboard.php">🏠 Home</a></li>
-            <li><a href="inventory.php">📦 Inventory</a></li>
-            <li><a href="sales.php">📈 Sales</a></li>
-            <li><a href="suppliers.php">🚚 Suppliers</a></li>
-            <li><a href="reports.php">📊 Reports</a></li>
-        </ul>
-        <a href="logout.php" class="logout">🚪 Logout</a>
+<div class="sidebar">
+    <div class="logo-container">
+        <img src="logo.png" alt="Logo" class="logo">
+    </div>
+    <ul class="menu">
+        <li><a href="dashboard.php">🏠 Home</a></li>
+        <li><a href="inventory.php">📦 Inventory</a></li>
+        <li><a href="sales.php">📈 Sales</a></li>
+        <li><a href="suppliers.php">🚚 Suppliers</a></li>
+        <li><a href="reports.php">📊 Reports</a></li>
+    </ul>
+    <a href="logout.php" class="logout">🚪 Logout</a>
+</div>
+
+<div class="content">
+    <div class="topbar">
+        <h2>📦 Inventory</h2>
+        <input type="text" class="search-bar" placeholder="Search Products...">
     </div>
 
-    <div class="content">
-        <div class="topbar">
-            <h2>📦 Inventory</h2>
-            <input type="text" class="search-bar" placeholder="Search Products...">
-        </div>
+    <div class="inventory-section">
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Brand</th>
+                    <th>Sizes</th>
+                    <th>Colors</th>
+                    <th>Quantity</th>
+                    <th>Price (₱)</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($products as $index => $item): ?>
+                <tr>
+                    <td><?= htmlspecialchars($item[0]) ?></td>
+                    <td><?= htmlspecialchars($item[3]) ?></td>
+                    <td>
+                        <select>
+                            <?php foreach ($item[1] as $size): ?>
+                                <option><?= htmlspecialchars($size) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                    <td>
+                        <select>
+                            <?php foreach ($item[2] as $color): ?>
+                                <option><?= htmlspecialchars($color) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </td>
+                    <td class="<?= $item[4] <= 0 ? 'out-of-stock' : '' ?>">
+                        <?= $item[4] <= 0 ? 'Out of Stock' : $item[4] ?>
+                    </td>
+                    <td>₱<?= number_format($item[5], 2) ?></td>
+                    <td>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="index" value="<?= $index ?>">
+                            <button type="submit" name="edit_product">Edit</button>
+                        </form>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="index" value="<?= $index ?>">
+                            <button type="submit" name="delete_product" onclick="return confirm('Delete this product?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
 
         <button class="toggle-form-button" onclick="toggleForm()">➕ Add Product</button>
 
-        <div class="inventory-section">
-            <button class="back-button" onclick="window.history.back()">Go Back</button>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Brand</th>
-                        <th>Sizes</th>
-                        <th>Colors</th>
-                        <th>Quantity</th>
-                        <th>Price (₱)</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($products as $index => $item): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($item[0]) ?></td>
-                        <td><?= htmlspecialchars($item[3]) ?></td>
-                        <td>
-                            <select>
-                                <?php foreach ($item[1] as $size): ?>
-                                    <option><?= htmlspecialchars($size) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </td>
-                        <td>
-                            <select>
-                                <?php foreach ($item[2] as $color): ?>
-                                    <option><?= htmlspecialchars($color) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </td>
-                        <td class="<?= $item[4] <= 0 ? 'out-of-stock' : '' ?>">
-                            <?= $item[4] <= 0 ? 'Out of Stock' : $item[4] ?>
-                        </td>
-                        <td>₱<?= number_format($item[5], 2) ?></td>
-                        <td>
-                            <form method="POST" style="display:inline;">
-                                <input type="hidden" name="index" value="<?= $index ?>">
-                                <button type="submit" name="edit_product">Edit</button>
-                            </form>
-                            <form method="POST" style="display:inline;">
-                                <input type="hidden" name="index" value="<?= $index ?>">
-                                <button type="submit" name="delete_product" onclick="return confirm('Delete this product?')">Delete</button>
-                            </form>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-
-           <div class="form-container" id="productForm" style="display: none;">
-    <h3>Add New Product</h3>
-    <form method="POST">
-        <input type="text" name="name" placeholder="Product Name" required><br>
-        <input type="text" name="sizes" placeholder="Sizes (comma-separated)" required><br>
-        <input type="text" name="colors" placeholder="Colors (comma-separated)" required><br>
-        <input type="text" name="brand" placeholder="Brand" required><br>
-        <input type="number" name="quantity" placeholder="Quantity" required><br>
-        <input type="number" step="0.01" name="price" placeholder="Price" required><br>
-        <button type="submit" name="add_product">Add Product</button>
+        <div class="form-container" id="productForm">
+            <h3>Add New Product</h3>
+            <form method="POST">
+                <input type="text" name="name" placeholder="Product Name" required><br><br>
+                <input type="text" name="sizes" placeholder="Sizes (comma-separated)" required><br><br>
+                <input type="text" name="colors" placeholder="Colors (comma-separated)" required><br><br>
+                <input type="text" name="brand" placeholder="Brand" required><br><br>
+                <input type="number" name="quantity" placeholder="Quantity" required><br><br>
+                <input type="number" step="0.01" name="price" placeholder="Price" required><br><br>
+                <button type="submit" name="add_product">Add Product</button>
             </form>
         </div>
-        </div>
     </div>
-    
-<script>
-    function toggleForm() {
-        const form = document.getElementById('productForm');
-        form.style.display = form.style.display === 'none' ? 'block' : 'none';
-    }
-</script>
+</div>
+
 </body>
 </html>
+
