@@ -237,18 +237,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </tbody>
             </table>
 
-            <div class="form-container">
-                <h3>Add New Product</h3>
-                <form method="POST">
-                    <input type="text" name="name" placeholder="Product Name" required><br>
-                    <input type="text" name="sizes" placeholder="Sizes (comma-separated)" required><br>
-                    <input type="text" name="colors" placeholder="Colors (comma-separated)" required><br>
-                    <input type="text" name="brand" placeholder="Brand" required><br>
-                    <input type="number" name="quantity" placeholder="Quantity" required><br>
-                    <input type="number" step="0.01" name="price" placeholder="Price" required><br>
-                    <button type="submit" name="add_product">Add Product</button>
-                </form>
-            </div>
+           <div class="form-container" id="productForm" style="display: none;">
+    <h3>Add New Product</h3>
+    <form method="POST">
+        <input type="text" name="name" placeholder="Product Name" required><br>
+        <input type="text" name="sizes" placeholder="Sizes (comma-separated)" required><br>
+        <input type="text" name="colors" placeholder="Colors (comma-separated)" required><br>
+        <input type="text" name="brand" placeholder="Brand" required><br>
+        <input type="number" name="quantity" placeholder="Quantity" required><br>
+        <input type="number" step="0.01" name="price" placeholder="Price" required><br>
+        <button type="submit" name="add_product">Add Product</button>
+            </form>
+        </div>
         </div>
     </div>
 
