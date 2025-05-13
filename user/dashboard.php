@@ -12,35 +12,33 @@ if (!isset($_SESSION["user"])) {
     exit();
 }
 
-$host     = 'localhost';
-$dbUser   = 'root';
-$dbPass   = '';
-$dbName   = 'clothing_store';
+// Provided products data
+$products = [
+    ["T-Shirt", ["S", "M", "L"], ["Black", "White"], "Uniqlo", 50, 10],
+    ["Jeans", ["28", "30", "32"], ["Blue", "Black"], "Levi's", 30, 25],
+    ["Skirt", ["S", "M", "L"], ["Red", "Blue"], "Zara", 0, 15],
+    ["Crop Top", ["XS", "S", "M"], ["White", "Pink"], "H&M", 8, 12],
+    ["Trouser", ["30", "32", "34"], ["Gray", "Beige"], "Gap", 35, 20],
+    ["Jacket", ["M", "L", "XL"], ["Black", "Gray"], "North Face", 5, 50],
+    ["Blazer", ["S", "M", "L"], ["Navy", "Gray"], "Zalora", 25, 40],
+    ["Shorts", ["28", "30", "32"], ["Khaki", "Olive"], "Bench", 12, 18],
+    ["Sweater", ["S", "M", "L"], ["Green", "Maroon"], "Penshoppe", 9, 22],
+    ["Hoodie", ["M", "L", "XL"], ["Black", "Red"], "Adidas", 0, 35],
+    ["Leggings", ["S", "M", "L"], ["Black", "Purple"], "Nike", 15, 30],
+    ["Blouse", ["XS", "S", "M"], ["Peach", "Cream"], "Forever 21", 18, 28],
+    ["Polo Shirt", ["S", "M", "L"], ["White", "Blue"], "Lacoste", 22, 32],
+    ["Tank Top", ["XS", "S", "M"], ["Yellow", "White"], "H&M", 11, 14],
+    ["Cardigan", ["S", "M", "L"], ["Beige", "Gray"], "Zara", 6, 24],
+    ["Denim Jacket", ["M", "L", "XL"], ["Denim", "Black"], "Levi's", 13, 48],
+    ["Tracksuit", ["M", "L", "XL"], ["Gray", "Navy"], "Adidas", 20, 55],
+    ["Overalls", ["S", "M", "L"], ["Blue", "Dark Blue"], "Gap", 4, 42],
+    ["Raincoat", ["S", "M", "L"], ["Yellow", "Transparent"], "Uniqlo", 2, 36],
+    ["Kimono", ["One Size"], ["Pink", "Floral"], "Japan Style", 7, 38],
+    ["New Product", ["S", "M", "L"], ["Color1", "Color2"], "Brand Name", 10, 20]
+];
 
-$conn = new mysqli($host, $dbUser, $dbPass, $dbName);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-$sql = "SELECT name, sizes, colors, brand, quantity, price
-        FROM products
-        ORDER BY name";
-$res = $conn->query($sql);
-$products = [];
-if ($res && $res->num_rows > 0) {
-    while ($row = $res->fetch_assoc()) {
-        $products[] = [
-            'name'     => $row['name'],
-            'sizes'    => json_decode($row['sizes'],  true),
-            'colors'   => json_decode($row['colors'], true),
-            'brand'    => $row['brand'],
-            'quantity' => (int)$row['quantity'],
-            'price'    => (float)$row['price'],
-        ];
-    }
-}
-$conn->close();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -192,34 +190,33 @@ $conn->close();
             <h2>Available Products</h2>
             <div class="product-grid">
               <?php foreach ($products as $item): 
-                  if ($item['quantity'] < 1) continue;
-                  $img = 'images/' . strtolower(str_replace(' ', '-', $item['name'])) . '.jpg';
+                  if ($item[4] < 1) continue; // Skip products with no stock
               ?>
                 <div class="product-card">
-                    <img src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($item['name']) ?>">
-                    <h3><?= htmlspecialchars($item['name']) ?></h3>
-                    <p>Brand: <?= htmlspecialchars($item['brand']) ?></p>
-                    <p>Available: <?= $item['quantity'] ?></p>
-                    <p>Price: ₱<?= number_format($item['price'],2) ?></p>
+                    <img src="images/<?= strtolower(str_replace(' ', '-', $item[0])) ?>.jpg" alt="<?= htmlspecialchars($item[0]) ?>">
+                    <h3><?= htmlspecialchars($item[0]) ?></h3>
+                    <p>Brand: <?= htmlspecialchars($item[3]) ?></p>
+                    <p>Available: <?= $item[4] ?></p>
+                    <p>Price: ₱<?= number_format($item[5],2) ?></p>
                     <form method="POST" action="purchase.php">
-                        <input type="hidden" name="product" value="<?= htmlspecialchars($item['name']) ?>">
-                        <input type="hidden" name="price"   value="<?= htmlspecialchars($item['price']) ?>">
+                        <input type="hidden" name="product" value="<?= htmlspecialchars($item[0]) ?>">
+                        <input type="hidden" name="price"   value="<?= htmlspecialchars($item[5]) ?>">
                         <label>Size:</label>
                         <select name="size" required>
                             <option value="">Select</option>
-                            <?php foreach ($item['sizes'] as $s): ?>
-                              <option><?= htmlspecialchars($s) ?></option>
+                            <?php foreach ($item[1] as $size): ?>
+                              <option><?= htmlspecialchars($size) ?></option>
                             <?php endforeach; ?>
                         </select>
                         <label>Color:</label>
                         <select name="color" required>
                             <option value="">Select</option>
-                            <?php foreach ($item['colors'] as $c): ?>
-                              <option><?= htmlspecialchars($c) ?></option>
+                            <?php foreach ($item[2] as $color): ?>
+                              <option><?= htmlspecialchars($color) ?></option>
                             <?php endforeach; ?>
                         </select>
                         <label>Quantity:</label>
-                        <input type="number" name="quantity" min="1" max="<?= $item['quantity'] ?>" required>
+                        <input type="number" name="quantity" min="1" max="<?= $item[4] ?>" required>
                         <button type="submit">Purchase</button>
                     </form>
                 </div>
@@ -229,3 +226,4 @@ $conn->close();
     </div>
 </body>
 </html>
+
