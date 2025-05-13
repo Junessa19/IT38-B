@@ -78,7 +78,7 @@ if ($conn->connect_error) {
             margin-left: 250px;
             width: calc(100% - 250px);
             background: #C7A061;
-            min-height: 100vh;
+            min-height: 280vh;
         }
         .topbar {
             display: flex;

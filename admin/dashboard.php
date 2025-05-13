@@ -6,6 +6,7 @@
         exit();
     }
 
+    
     $completedOrders = 25;
     $pendingOrders = 8;
     $cancelledOrders = 2;
@@ -27,6 +28,7 @@
     <meta charset="UTF-8">
     <title>StockHub Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -148,6 +150,7 @@
         </div>
 
         <div class="dashboard-content">
+         
             <div class="card">
                 <h3>📊 Order Status</h3>
                 <canvas id="orderChart" width="100" height="100"></canvas>
@@ -176,6 +179,7 @@
     </div>
 
     <script>
+
         const orderChart = document.getElementById('orderChart').getContext('2d');
         new Chart(orderChart, {
             type: 'pie',

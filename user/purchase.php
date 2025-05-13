@@ -1,14 +1,12 @@
 <?php
 session_start();
 
-// 1) Ensure user is logged in
 if (!isset($_SESSION['user'])) {
     header('Location: login.php');
     exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // 2) Get POST data
     $product  = $_POST['product'];
     $size     = $_POST['size'];
     $color    = $_POST['color'];
@@ -16,7 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $price    = (float) $_POST['price'];
     $total    = $quantity * $price;
 
-    // 3) Connect to DB
     $host = 'localhost';
     $db   = 'clothing_store';
     $user = 'root';
@@ -28,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
         ]);
 
-        // 4) Check stock availability
         $check_sql = "SELECT quantity FROM products
                       WHERE name = :product_name
                       AND FIND_IN_SET(:size, sizes) > 0
@@ -47,7 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             die("❌ Not enough stock available.");
         }
 
-        // 5) Insert into orders table
         $order_sql = "INSERT INTO orders
                       (user_id, product_name, size, color, quantity, total_price, status, order_date)
                       VALUES
@@ -64,7 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':status'       => 'Pending',
         ]);
 
-        // 6) Update stock in products table
         $update_sql = "UPDATE products
                        SET quantity = quantity - :quantity
                        WHERE name = :product_name
@@ -83,7 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die("Database error: " . $e->getMessage());
     }
 
-    // 7) Show confirmation
     ?>
     <!DOCTYPE html>
     <html>
@@ -141,7 +134,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// Redirect if not POST
 header('Location: dashboard.php');
 exit;
 ?>
