@@ -182,6 +182,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="text" class="search-bar" placeholder="Search Products...">
         </div>
 
+        <button class="toggle-form-button" onclick="toggleForm()">➕ Add Product</button>
+
         <div class="inventory-section">
             <button class="back-button" onclick="window.history.back()">Go Back</button>
 
