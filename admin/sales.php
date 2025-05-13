@@ -98,7 +98,7 @@ if ($conn->connect_error) {
         }
         .dashboard-content {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: 1fr;
             gap: 20px;
             padding: 20px;
         }
@@ -126,7 +126,6 @@ if ($conn->connect_error) {
             background-color: #6e4c2f;
         }
 
-      
         .collapsible {
             cursor: pointer;
             padding: 10px;
@@ -176,6 +175,7 @@ if ($conn->connect_error) {
             <input type="text" class="search-bar" placeholder="Search...">
         </div>
         <div class="dashboard-content">
+        
             <div class="card">
                 <button class="collapsible">🧾 Sales Overview</button>
                 <div class="content-section">
@@ -192,7 +192,7 @@ if ($conn->connect_error) {
                 </div>
             </div>
 
-            
+          
             <div class="card">
                 <button class="collapsible">📅 Sales by Date</button>
                 <div class="content-section">
@@ -209,7 +209,7 @@ if ($conn->connect_error) {
                 </div>
             </div>
 
-         
+        
             <div class="card">
                 🛒 Customer Orders
                 <br><br>
@@ -219,7 +219,7 @@ if ($conn->connect_error) {
     </div>
 
     <script>
-        // JavaScript to toggle collapsible content visibility
+        
         var coll = document.getElementsByClassName("collapsible");
         for (var i = 0; i < coll.length; i++) {
             coll[i].addEventListener("click", function() {
