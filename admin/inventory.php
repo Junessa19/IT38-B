@@ -2,27 +2,27 @@
 session_start();
 
 $products = [
-    ["T-Shirt", ["S", "M", "L"], ["Black", "White"], "Uniqlo", 50, 10],
-    ["Jeans", ["28", "30", "32"], ["Blue", "Black"], "Levi's", 30, 25],
-    ["Skirt", ["S", "M", "L"], ["Red", "Blue"], "Zara", 0, 15],
-    ["Crop Top", ["XS", "S", "M"], ["White", "Pink"], "H&M", 8, 12],
-    ["Trouser", ["30", "32", "34"], ["Gray", "Beige"], "Gap", 35, 20],
-    ["Jacket", ["M", "L", "XL"], ["Black", "Gray"], "North Face", 5, 50],
-    ["Blazer", ["S", "M", "L"], ["Navy", "Gray"], "Zalora", 25, 40],
-    ["Shorts", ["28", "30", "32"], ["Khaki", "Olive"], "Bench", 12, 18],
-    ["Sweater", ["S", "M", "L"], ["Green", "Maroon"], "Penshoppe", 9, 22],
-    ["Hoodie", ["M", "L", "XL"], ["Black", "Red"], "Adidas", 0, 35],
-    ["Leggings", ["S", "M", "L"], ["Black", "Purple"], "Nike", 15, 30],
-    ["Blouse", ["XS", "S", "M"], ["Peach", "Cream"], "Forever 21", 18, 28],
-    ["Polo Shirt", ["S", "M", "L"], ["White", "Blue"], "Lacoste", 22, 32],
-    ["Tank Top", ["XS", "S", "M"], ["Yellow", "White"], "H&M", 11, 14],
-    ["Cardigan", ["S", "M", "L"], ["Beige", "Gray"], "Zara", 6, 24],
-    ["Denim Jacket", ["M", "L", "XL"], ["Denim", "Black"], "Levi's", 13, 48],
-    ["Tracksuit", ["M", "L", "XL"], ["Gray", "Navy"], "Adidas", 20, 55],
-    ["Overalls", ["S", "M", "L"], ["Blue", "Dark Blue"], "Gap", 4, 42],
-    ["Raincoat", ["S", "M", "L"], ["Yellow", "Transparent"], "Uniqlo", 2, 36],
-    ["Kimono", ["One Size"], ["Pink", "Floral"], "Japan Style", 7, 38],
-    ["New Product", ["S", "M", "L"], ["Color1", "Color2"], "Brand Name", 10, 20]
+    ["T-Shirt", ["XS", "S", "M", "L", "XL"], ["Black", "White", "Gray"], "Uniqlo", 50, 10],
+    ["Jeans", ["20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "45"], ["Blue", "Black", "Dark Blue"], "Levi's", 30, 25],
+    ["Skirt", ["XS", "S", "M", "L", "XL"], ["Red", "Blue", "Pink"], "Zara", 0, 15],
+    ["Crop Top", ["XS", "S", "M", "L"], ["White", "Pink", "Lavender"], "H&M", 8, 12],
+    ["Trouser", ["20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "45"], ["Gray", "Beige", "Black"], "Gap", 35, 20],
+    ["Jacket", ["S", "M", "L", "XL", "XXL"], ["Black", "Gray", "Navy"], "North Face", 5, 50],
+    ["Blazer", ["XS", "S", "M", "L", "XL"], ["Navy", "Gray", "Black"], "Zalora", 25, 40],
+    ["Shorts", ["20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44"], ["Khaki", "Olive", "Brown"], "Bench", 12, 18],
+    ["Sweater", ["XS", "S", "M", "L", "XL"], ["Green", "Maroon", "Navy"], "Penshoppe", 9, 22],
+    ["Hoodie", ["S", "M", "L", "XL", "XXL"], ["Black", "Red", "White"], "Adidas", 0, 35],
+    ["Leggings", ["XS", "S", "M", "L", "XL"], ["Black", "Purple", "Gray"], "Nike", 15, 30],
+    ["Blouse", ["XS", "S", "M", "L"], ["Peach", "Cream", "White"], "Forever 21", 18, 28],
+    ["Polo Shirt", ["S", "M", "L", "XL"], ["White", "Blue", "Green"], "Lacoste", 22, 32],
+    ["Tank Top", ["XS", "S", "M", "L"], ["Yellow", "White", "Coral"], "H&M", 11, 14],
+    ["Cardigan", ["S", "M", "L", "XL"], ["Beige", "Gray", "Brown"], "Zara", 6, 24],
+    ["Denim Jacket", ["M", "L", "XL", "XXL"], ["Denim", "Black", "Light Blue"], "Levi's", 13, 48],
+    ["Tracksuit", ["S", "M", "L", "XL"], ["Gray", "Navy", "Black"], "Adidas", 20, 55],
+    ["Overalls", ["XS", "S", "M", "L", "XL"], ["Blue", "Dark Blue", "Denim"], "Gap", 4, 42],
+    ["Raincoat", ["XS", "S", "M", "L", "XL"], ["Yellow", "Transparent", "Gray"], "Uniqlo", 2, 36],
+    ["Kimono", ["One Size"], ["Pink", "Floral", "White"], "Japan Style", 7, 38],
+    ["New Product", ["XS", "S", "M", "L", "XL"], ["Color1", "Color2", "Color3"], "Brand Name", 10, 20]
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
