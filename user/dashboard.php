@@ -12,7 +12,6 @@ if (!isset($_SESSION["user"])) {
     exit();
 }
 
-// Provided products data
 $products = [
     ["T-Shirt", ["S", "M", "L"], ["Black", "White"], "Uniqlo", 50, 10],
     ["Jeans", ["28", "30", "32"], ["Blue", "Black"], "Levi's", 30, 25],
