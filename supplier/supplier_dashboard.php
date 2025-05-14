@@ -1,7 +1,43 @@
 <?php
 include __DIR__ . '/../db_connection.php';
 
-$supplier_id = 1; // Replace with dynamic supplier_id when session is available
+$supplier_id = 1; // Replace this with session logic when available
+
+// Optional: Insert sample 50 products if needed (only once)
+$check = mysqli_query($conn, "SELECT COUNT(*) as total FROM supplier_products WHERE supplier_id = $supplier_id");
+$row = mysqli_fetch_assoc($check);
+if ($row['total'] == 0) {
+    $sample_products = [
+        ["T-Shirt", ["XS", "S", "M", "L", "XL"], ["Black", "White", "Gray"], "Uniqlo", 50, 10, "tshirt.jpg"],
+        ["Jeans", ["20", "22", "24", "26", "28", "30"], ["Blue", "Black"], "Levi's", 30, 25, "jeans.jpg"],
+        ["Skirt", ["XS", "S", "M"], ["Red", "Blue"], "Zara", 0, 15, "skirt.jpg"],
+        ["Crop Top", ["XS", "S", "M"], ["Pink", "Lavender"], "H&M", 8, 12, "crop_top.jpg"],
+        ["Trouser", ["26", "28", "30"], ["Gray", "Beige"], "Gap", 35, 20, "trouser.jpg"],
+        ["Jacket", ["M", "L", "XL"], ["Black", "Navy"], "North Face", 5, 50, "jacket.jpg"],
+        ["Blazer", ["S", "M", "L"], ["Gray", "Black"], "Zalora", 25, 40, "blazer.jpg"],
+        ["Shorts", ["26", "28", "30"], ["Khaki", "Olive"], "Bench", 12, 18, "shorts.jpg"],
+        ["Sweater", ["S", "M", "L"], ["Green", "Navy"], "Penshoppe", 9, 22, "sweater.jpg"],
+        ["Hoodie", ["M", "L", "XL"], ["Black", "Red"], "Adidas", 0, 35, "hoodie.jpg"]
+    ];
+
+    for ($i = 1; $i <= 5; $i++) {
+        foreach ($sample_products as $product) {
+            $name = $product[0] . " $i";
+            $size = $product[1][array_rand($product[1])];
+            $color = $product[2][array_rand($product[2])];
+            $brand = $product[3];
+            $price = $product[4];
+            $quantity = $product[5];
+            $image = $product[6];
+
+            $stmt = $conn->prepare("INSERT INTO supplier_products (supplier_id, product_name, size, color, brand, price, available_quantity, image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("issssdis", $supplier_id, $name, $size, $color, $brand, $price, $quantity, $image);
+            $stmt->execute();
+        }
+    }
+}
+
+// Fetch products
 $sql = "SELECT * FROM supplier_products WHERE supplier_id = $supplier_id";
 $result = mysqli_query($conn, $sql);
 ?>
@@ -126,7 +162,7 @@ $result = mysqli_query($conn, $sql);
     <div class="main">
         <h1>Supplier Dashboard</h1>
 
-        <div id="Products" class="tabcontent">
+        <div id="Products">
             <h2>📦 Your Products</h2>
             <table>
                 <tr>
