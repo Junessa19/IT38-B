@@ -1,231 +1,323 @@
 <?php
 session_start();
 
-if (isset($_GET['logout'])) {
-    session_destroy();  
-    header("Location: login.php");  
-    exit();
+// Initialize products in session if not already set
+if (!isset($_SESSION['products'])) {
+    $_SESSION['products'] = [
+        ["T-Shirt", ["XS", "S", "M", "L", "XL"], ["Black", "White", "Gray"], "Uniqlo", 50, 10, "t-shirt.jpg"],
+        ["Jeans", ["20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "45"], ["Blue", "Black", "Dark Blue"], "Levi's", 30, 25, "jeans.jpg"],
+        ["Skirt", ["XS", "S", "M", "L", "XL"], ["Red", "Blue", "Pink"], "Zara", 0, 15, "skirt.jpg"],
+        ["Crop Top", ["XS", "S", "M", "L"], ["White", "Pink", "Lavender"], "H&M", 8, 12, "crop top.jpg"],
+        ["Trouser", ["20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "45"], ["Gray", "Beige", "Black"], "Gap", 35, 20, "trouser.jpg"],
+        ["Jacket", ["S", "M", "L", "XL", "XXL"], ["Black", "Gray", "Navy"], "North Face", 5, 50, "jacket.jpg"],
+        ["Blazer", ["XS", "S", "M", "L", "XL"], ["Navy", "Gray", "Black"], "Zalora", 25, 40, "blazer.jpg"],
+        ["Shorts", ["20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44"], ["Khaki", "Olive", "Brown"], "Bench", 12, 18, "shorts.jpg"],
+        ["Sweater", ["XS", "S", "M", "L", "XL"], ["Green", "Maroon", "Navy"], "Penshoppe", 9, 22, "sweater.jpg"],
+        ["Hoodie", ["S", "M", "L", "XL", "XXL"], ["Black", "Red", "White"], "Adidas", 0, 35, "hoodie.jpg"]
+    ];
 }
 
-if (!isset($_SESSION["user"])) {
-    header("Location: login.php");
-    exit();
+$products = $_SESSION['products'];
+$editIndex = null;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['add_product'])) {
+        $name = $_POST['name'];
+        $sizes = explode(",", $_POST['sizes']);
+        $colors = explode(",", $_POST['colors']);
+        $brand = $_POST['brand'];
+        $quantity = (int)$_POST['quantity'];
+        $price = (float)$_POST['price'];
+        $image = $_POST['image'];
+
+        $products[] = [$name, $sizes, $colors, $brand, $quantity, $price, $image];
+    }
+
+    if (isset($_POST['edit_product'])) {
+        $editIndex = $_POST['index'];
+    }
+
+    if (isset($_POST['save_edit'])) {
+        $index = $_POST['index'];
+        $name = $_POST['name'];
+        $sizes = explode(",", $_POST['sizes']);
+        $colors = explode(",", $_POST['colors']);
+        $brand = $_POST['brand'];
+        $quantity = (int)$_POST['quantity'];
+        $price = (float)$_POST['price'];
+        $image = $_POST['image'];
+
+        $products[$index] = [$name, $sizes, $colors, $brand, $quantity, $price, $image];
+    }
+
+    if (isset($_POST['delete_product'])) {
+        $index = $_POST['index'];
+        unset($products[$index]);
+        $products = array_values($products);
+    }
+
+    $_SESSION['products'] = $products;
 }
-
-$products = [
-    ["T-Shirt", ["S", "M", "L"], ["Black", "White"], "Uniqlo", 50, 10],
-    ["Jeans", ["28", "30", "32"], ["Blue", "Black"], "Levi's", 30, 25],
-    ["Skirt", ["S", "M", "L"], ["Red", "Blue"], "Zara", 0, 15],
-    ["Crop Top", ["XS", "S", "M"], ["White", "Pink"], "H&M", 8, 12],
-    ["Trouser", ["30", "32", "34"], ["Gray", "Beige"], "Gap", 35, 20],
-    ["Jacket", ["M", "L", "XL"], ["Black", "Gray"], "North Face", 5, 50],
-    ["Blazer", ["S", "M", "L"], ["Navy", "Gray"], "Zalora", 25, 40],
-    ["Shorts", ["28", "30", "32"], ["Khaki", "Olive"], "Bench", 12, 18],
-    ["Sweater", ["S", "M", "L"], ["Green", "Maroon"], "Penshoppe", 9, 22],
-    ["Hoodie", ["M", "L", "XL"], ["Black", "Red"], "Adidas", 0, 35],
-    ["Leggings", ["S", "M", "L"], ["Black", "Purple"], "Nike", 15, 30],
-    ["Blouse", ["XS", "S", "M"], ["Peach", "Cream"], "Forever 21", 18, 28],
-    ["Polo Shirt", ["S", "M", "L"], ["White", "Blue"], "Lacoste", 22, 32],
-    ["Tank Top", ["XS", "S", "M"], ["Yellow", "White"], "H&M", 11, 14],
-    ["Cardigan", ["S", "M", "L"], ["Beige", "Gray"], "Zara", 6, 24],
-    ["Denim Jacket", ["M", "L", "XL"], ["Denim", "Black"], "Levi's", 13, 48],
-    ["Tracksuit", ["M", "L", "XL"], ["Gray", "Navy"], "Adidas", 20, 55],
-    ["Overalls", ["S", "M", "L"], ["Blue", "Dark Blue"], "Gap", 4, 42],
-    ["Raincoat", ["S", "M", "L"], ["Yellow", "Transparent"], "Uniqlo", 2, 36],
-    ["Kimono", ["One Size"], ["Pink", "Floral"], "Japan Style", 7, 38],
-    ["New Product", ["S", "M", "L"], ["Color1", "Color2"], "Brand Name", 10, 20]
-];
-
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - Shop</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory | StockHub</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
             display: flex;
-            height: 100vh;
-            flex-direction: column;
-        }
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #8B6F3F;
-            padding: 15px;
-            color: white;
-        }
-        .welcome {
-            font-size: 20px;
-            font-weight: bold;
+            background-color: #f5f0ed;
         }
 
         .sidebar {
-            width: 250px;
-            background: #8B6F3F;
-            color: white;
+            width: 160px;
+            background-color: #4E342E;
+            color: #fff;
             height: 100vh;
-            padding: 20px;
-            position: fixed;
-            left: 0;
-            top: 0;
+            padding: 20px 10px;
+            box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            justify-content: space-between;
         }
 
         .logo {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: white;
-            object-fit: cover;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            margin-bottom: 15px;
+            width: 100px;
+            display: block;
+            margin: 0 auto 30px auto;
         }
 
-        .orders-button {
-            background: white;
-            color: #8B6F3F;
-            padding: 8px 12px;
-            border-radius: 5px;
+        .menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .menu li {
+            margin: 25px 0;
+            text-align: center;
+        }
+
+        .menu a {
+            color: #fff;
             text-decoration: none;
-            font-weight: bold;
-            margin-bottom: 20px;
-            display: inline-block;
+            font-size: 18px;
+            display: block;
         }
 
-        .orders-button:hover {
-            background: #f0e0c0;
-        }
-
-        .logout-link {
-            margin-top: auto;
-            font-weight: bold;
-            color: white;
+        .logout {
+            text-align: center;
+            color: #fff;
             text-decoration: none;
+            padding: 10px;
+            border-top: 1px solid #fff;
+            margin-top: 30px;
+            font-weight: bold;
         }
 
         .content {
-            margin-left: 250px;
-            width: calc(100% - 250px);
-            background: #C7A061;
-            min-height: 280vh;
-            padding-top: 80px;
+            flex-grow: 1;
+            padding: 20px 40px;
         }
 
-        .product-section { padding: 20px; }
-        h2 { color: #5a3e1b; margin-bottom: 20px; }
-
-        .product-grid {
+        .topbar {
+            background-color: #A1887F;
+            padding: 12px 20px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .product-card {
-            background: white;
-            padding: 15px;
-            width: 220px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        .product-card img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .product-card h3 {
-            color: #5a3e1b;
-            margin: 10px 0 5px;
-        }
-
-        .product-card p { margin: 5px 0; }
-
-        .product-card select,
-        .product-card input[type="number"] {
-            width: 100%;
-            padding: 5px;
-            margin-bottom: 10px;
-        }
-
-        .product-card button {
-            width: 100%;
-            background: #8B6F3F;
+            justify-content: space-between;
+            align-items: center;
             color: white;
-            border: none;
+            border-radius: 10px;
+        }
+
+        .search-bar {
+            padding: 6px;
+            border-radius: 5px;
+            border: 1px solid #999;
+            width: 200px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table, th, td {
+            border: 1px solid #D7CCC8;
+        }
+
+        th {
+            background-color: #6D4C41;
+            color: #fff;
+            padding: 12px;
+        }
+
+        td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .form-container {
+            margin-top: 30px;
+            background-color: #EFEBE9;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .form-container input, .form-container select {
             padding: 8px;
+            margin: 8px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .form-container button {
+            background-color: #6D4C41;
+            color: white;
+            padding: 10px 20px;
+            border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin-top: 10px;
         }
 
-        .product-card button:hover { background: #6b5430; }
+        .form-container button:hover,
+        .toggle-form-button:hover {
+            background-color: #5D4037;
+        }
+
+        .toggle-form-button {
+            background-color: #6D4C41;
+            color: white;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .product-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+        }
     </style>
+    <script>
+        function toggleForm() {
+            const form = document.getElementById("addForm");
+            form.style.display = form.style.display === "none" ? "block" : "none";
+        }
+    </script>
 </head>
 <body>
+
+<div class="sidebar">
+    <img src="logo.png" alt="Logo" class="logo">
+    <ul class="menu">
+        <li><a href="dashboard.php">🏠 Home</a></li>
+        <li><a href="inventory.php">📦 Inventory</a></li>
+        <li><a href="sales.php">📈 Sales</a></li>
+        <li><a href="suppliers.php">🚚 Suppliers</a></li>
+    </ul>
+    <a href="logout.php" class="logout">🚪 Logout</a>
+</div>
+
+<div class="content">
     <div class="topbar">
-        <div class="welcome">
-            Welcome, <?= htmlspecialchars($_SESSION["user"]) ?>! 🛍️
-        </div>
+        <h2>📦 Inventory</h2>
+        <input type="text" class="search-bar" placeholder="Search Products...">
     </div>
 
-    <div class="sidebar">
-        <img src="logo.png" alt="Logo" class="logo">
-        <a href="orders.php" class="orders-button">My Orders</a>
-        <a href="?logout" class="logout-link">🚪 Logout</a>
-    </div>
-
-    <div class="content">
-        <div class="product-section">
-            <h2>Available Products</h2>
-            <div class="product-grid">
-              <?php foreach ($products as $item): 
-                  if ($item[4] < 1) continue; // Skip products with no stock
-              ?>
-                <div class="product-card">
-                    <img src="images/<?= strtolower(str_replace(' ', '-', $item[0])) ?>.jpg" alt="<?= htmlspecialchars($item[0]) ?>">
-                    <h3><?= htmlspecialchars($item[0]) ?></h3>
-                    <p>Brand: <?= htmlspecialchars($item[3]) ?></p>
-                    <p>Available: <?= $item[4] ?></p>
-                    <p>Price: ₱<?= number_format($item[5],2) 
-                    ?></p>
-
-                  <form method="POST" action="purchase.php">
-    <input type="hidden" name="product" value="<?= htmlspecialchars($item[0]) ?>">
-    <input type="hidden" name="price" value="<?= htmlspecialchars($item[5]) ?>">
-    <label>Size:</label>
-    <select name="size" required>
-        <option value="">Select</option>
-        <?php foreach ($item[1] as $size): ?>
-            <option><?= htmlspecialchars($size) ?></option>
+    <table>
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Product</th>
+                <th>Brand</th>
+                <th>Sizes</th>
+                <th>Colors</th>
+                <th>Quantity</th>
+                <th>Price (₱)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($products as $index => $item): ?>
+            <?php if ($editIndex !== null && $editIndex == $index): ?>
+                <tr>
+                    <form method="POST">
+                        <td><input type="text" name="image" value="<?= htmlspecialchars($item[6]) ?>"></td>
+                        <td><input type="text" name="name" value="<?= htmlspecialchars($item[0]) ?>"></td>
+                        <td><input type="text" name="brand" value="<?= htmlspecialchars($item[3]) ?>"></td>
+                        <td><input type="text" name="sizes" value="<?= htmlspecialchars(implode(",", $item[1])) ?>"></td>
+                        <td><input type="text" name="colors" value="<?= htmlspecialchars(implode(",", $item[2])) ?>"></td>
+                        <td><input type="number" name="quantity" value="<?= htmlspecialchars($item[4]) ?>"></td>
+                        <td><input type="number" name="price" value="<?= htmlspecialchars($item[5]) ?>"></td>
+                        <td>
+                            <input type="hidden" name="index" value="<?= $index ?>">
+                            <button type="submit" name="save_edit">💾 Save</button>
+                        </td>
+                    </form>
+                </tr>
+            <?php else: ?>
+                <tr>
+                    <td>
+                        <?php
+                            $imagePath = 'images/' . htmlspecialchars($item[6]);
+                            if (file_exists($imagePath)) {
+                                echo '<img src="' . $imagePath . '" class="product-img">';
+                            } else {
+                                echo '<span style="color:red;">Image not found</span>';
+                            }
+                        ?>
+                    </td>
+                    <td><?= htmlspecialchars($item[0]) ?></td>
+                    <td><?= htmlspecialchars($item[3]) ?></td>
+                    <td><select><?php foreach ($item[1] as $size): ?><option><?= htmlspecialchars($size) ?></option><?php endforeach; ?></select></td>
+                    <td><select><?php foreach ($item[2] as $color): ?><option><?= htmlspecialchars($color) ?></option><?php endforeach; ?></select></td>
+                    <td><?= $item[4] ?></td>
+                    <td>₱<?= number_format($item[5], 2) ?></td>
+                    <td>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="index" value="<?= $index ?>">
+                            <button type="submit" name="edit_product">✏️ Edit</button>
+                        </form>
+                        <form method="POST" style="display:inline;">
+                            <input type="hidden" name="index" value="<?= $index ?>">
+                            <button type="submit" name="delete_product" onclick="return confirm('Delete this product?')">🗑️ Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            <?php endif; ?>
         <?php endforeach; ?>
-    </select>
-    <label>Color:</label>
-    <select name="color" required>
-        <option value="">Select</option>
-        <?php foreach ($item[2] as $color): ?>
-            <option><?= htmlspecialchars($color) ?></option>
-        <?php endforeach; ?>
-    </select>
-    <label>Quantity:</label>
-    <input type="number" name="quantity" min="1" max="<?= $item[4] ?>" required>
-    <button type="submit">Purchase</button>
-</form>
+        </tbody>
+    </table>
 
-                </div>
-              <?php endforeach; ?>
-            </div>
-        </div>
+    <button class="toggle-form-button" onclick="toggleForm()">➕ Add Product</button>
+
+    <div class="form-container" id="addForm" style="display:none;">
+        <form method="POST">
+            <h3>Add New Product</h3>
+            <input type="text" name="name" placeholder="Product Name" required><br>
+            <input type="text" name="sizes" placeholder="Sizes (comma-separated)" required><br>
+            <input type="text" name="colors" placeholder="Colors (comma-separated)" required><br>
+            <input type="text" name="brand" placeholder="Brand" required><br>
+            <input type="number" name="quantity" placeholder="Quantity" required><br>
+            <input type="number" name="price" placeholder="Price" required><br>
+            <input type="text" name="image" placeholder="Image filename (e.g. tshirt.jpg)" required><br>
+            <button type="submit" name="add_product">Add Product</button>
+        </form>
     </div>
+</div>
+
 </body>
 </html>
-

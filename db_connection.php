@@ -1,13 +1,11 @@
 <?php
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "stockhub"; // Replace with your actual database name
+$host = 'localhost';
+$user = 'root';
+$password = '';
+$database = 'stockhub'; // ⚠️ Change this to your real DB name
 
-// Create connection
-$conn = mysqli_connect($servername, $username, $password, $dbname);
+$conn = mysqli_connect($host, $user, $password, $database);
 
-// Check connection
 if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
