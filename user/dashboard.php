@@ -168,7 +168,7 @@ try {
     <div class="sidebar">
         <img src="logo.png" alt="Logo" class="logo" />
         <a href="orders.php" class="orders-button">My Orders</a>
-        <a href="?logout" class="logout-link">🚪 Logout</a>
+        <a href="logout.php" class="logout-link">🚪 Logout</a>
     </div>
 
     <div class="content">

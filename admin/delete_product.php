@@ -28,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_product'])) {
             unlink($product['image']);
         }
 
-        // Delete the product
         $stmt = $pdo->prepare("DELETE FROM products WHERE id = :id");
         $stmt->execute([':id' => $id]);
 
