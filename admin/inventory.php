@@ -1,331 +1,233 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['products'])) {
-    $_SESSION['products'] = [
-        ["T-Shirt", ["XS", "S", "M", "L", "XL"], ["Black", "White", "Gray"], "Uniqlo", 50, 10, "t-shirt.jpg"],
-        ["Jeans", ["20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "45"], ["Blue", "Black", "Dark Blue"], "Levi's", 30, 25, "jeans.jpg"],
-        ["Skirt", ["XS", "S", "M", "L", "XL"], ["Red", "Blue", "Pink"], "Zara", 0, 15, "skirt.jpg"],
-        ["Crop Top", ["XS", "S", "M", "L"], ["White", "Pink", "Lavender"], "H&M", 8, 12, "crop top.jpg"],
-        ["Trouser", ["20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44", "45"], ["Gray", "Beige", "Black"], "Gap", 35, 20, "trouser.jpg"],
-        ["Jacket", ["S", "M", "L", "XL", "XXL"], ["Black", "Gray", "Navy"], "North Face", 5, 50, "jacket.jpg"],
-        ["Blazer", ["XS", "S", "M", "L", "XL"], ["Navy", "Gray", "Black"], "Zalora", 25, 40, "blazer.jpg"],
-        ["Shorts", ["20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40", "42", "44"], ["Khaki", "Olive", "Brown"], "Bench", 12, 18, "shorts.jpg"],
-        ["Sweater", ["XS", "S", "M", "L", "XL"], ["Green", "Maroon", "Navy"], "Penshoppe", 9, 22, "sweater.jpg"],
-        ["Hoodie", ["S", "M", "L", "XL", "XXL"], ["Black", "Red", "White"], "Adidas", 0, 35, "hoodie.jpg"]
-    ];
+if (!isset($_SESSION['user'])) {
+    header('Location: login.php');
+    exit();
 }
 
-$products = $_SESSION['products'];
-$editIndex = null;
+// Database connection details
+$host = 'localhost';
+$db   = 'clothing_store';
+$user = 'root';
+$pass = '';
+$dsn  = "mysql:host=$host;dbname=$db;charset=utf8mb4";
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['add_product'])) {
-        $products[] = [
-            $_POST['name'],
-            explode(",", $_POST['sizes']),
-            explode(",", $_POST['colors']),
-            $_POST['brand'],
-            (int)$_POST['quantity'],
-            (float)$_POST['price'],
-            $_POST['image']
-        ];
-    }
-
-    if (isset($_POST['edit_product'])) {
-        $editIndex = $_POST['index'];
-    }
-
-    if (isset($_POST['save_edit'])) {
-        $products[$_POST['index']] = [
-            $_POST['name'],
-            explode(",", $_POST['sizes']),
-            explode(",", $_POST['colors']),
-            $_POST['brand'],
-            (int)$_POST['quantity'],
-            (float)$_POST['price'],
-            $_POST['image']
-        ];
-    }
-
-    if (isset($_POST['delete_product'])) {
-        unset($products[$_POST['index']]);
-        $products = array_values($products);
-    }
-
-    $_SESSION['products'] = $products;
+try {
+    $pdo = new PDO($dsn, $user, $pass, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+    ]);
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
 }
+
+// Initialize messages
+$error = '';
+$success = '';
+
+// Handle product addition POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_product'])) {
+    $product_name = trim($_POST['product_name']);
+    $sizes        = trim($_POST['sizes']);
+    $colors       = trim($_POST['colors']);
+    $brand        = trim($_POST['brand']);
+    $quantity     = (int) $_POST['quantity'];
+    $price        = (float) $_POST['price'];
+    $image        = $_FILES['image']['name'];
+
+    // Validate image upload
+    if ($_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $image_tmp = $_FILES['image']['tmp_name'];
+        $image_path = 'images/' . basename($image);
+        move_uploaded_file($image_tmp, $image_path);
+    } else {
+        $image_path = '';
+    }
+
+    try {
+        // Insert new product into the database
+        $sql = "INSERT INTO products (product_name, sizes, colors, brand, quantity, price, image)
+                VALUES (:product_name, :sizes, :colors, :brand, :quantity, :price, :image)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':product_name' => $product_name,
+            ':sizes'        => $sizes,
+            ':colors'       => $colors,
+            ':brand'        => $brand,
+            ':quantity'     => $quantity,
+            ':price'        => $price,
+            ':image'        => $image_path,
+        ]);
+
+        $success = "✅ Product '$product_name' added successfully.";
+    } catch (PDOException $e) {
+        $error = "Database error: " . $e->getMessage();
+    }
+}
+
+// Fetch all products for inventory display
+$stmt = $pdo->query("SELECT * FROM products");
+$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Filter out the product "T-Shirt"
+$products = array_filter($products, function ($item) {
+    return strtolower($item['product_name']) !== 't-shirt';
+});
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Inventory | StockHub</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            background-color: #FBE9E7;
-        }
-
-        .sidebar {
-            width: 180px;
-            background-color: #5D4037;
-            color: #fff;
-            padding: 20px 10px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .logo {
-            width: 90px;
-            display: block;
-            margin: 0 auto 30px auto;
-        }
-
-        .menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .menu li {
-            margin: 15px 0;
-            text-align: center;
-        }
-
-        .menu a {
-            text-decoration: none;
-            color: #fff;
-            font-weight: bold;
-            font-size: 15px;
-            padding: 8px;
-            display: block;
-            border-radius: 5px;
-        }
-
-        .menu a:hover {
-            background-color: #6D4C41;
-        }
-
-        .logout {
-            text-align: center;
-            padding-top: 10px;
-            border-top: 1px solid #fff;
-            margin-top: 20px;
-        }
-
-        .logout a {
-            color: #fff;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .content {
-            flex-grow: 1;
-            padding: 20px;
-        }
-
-        .topbar {
-            background-color: #D7CCC8;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 12px;
-        }
-
-        .search-bar {
-            padding: 6px 10px;
-            border-radius: 5px;
-            border: 1px solid #aaa;
-            width: 250px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        th, td {
-            border: 1px solid #D7CCC8;
-            padding: 10px;
-            text-align: center;
-        }
-
-        th {
-            background-color: #A1887F;
-            color: white;
-        }
-
-        .product-img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-        }
-
-        .form-container {
-            background-color: #FFF3E0;
-            padding: 20px;
-            margin-top: 20px;
-            border-radius: 12px;
-        }
-
-        .form-container input, .form-container select {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-        }
-
-        .form-container button {
-            background-color: #795548;
-            color: #fff;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .form-container button:hover {
-            background-color: #6D4C41;
-        }
-
-        .toggle-form-button {
-            background-color: #8D6E63;
-            color: #fff;
-            border: none;
-            padding: 10px 14px;
-            border-radius: 6px;
-            margin-top: 20px;
-            cursor: pointer;
-        }
-
-        .toggle-form-button:hover {
-            background-color: #6D4C41;
-        }
-    </style>
-    <script>
-        function toggleForm() {
-            const form = document.getElementById("addForm");
-            form.style.display = (form.style.display === "none") ? "block" : "none";
-        }
-    </script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Inventory</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f9f9f9;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        margin-bottom: 40px;
+    }
+    th, td {
+        padding: 12px;
+        border: 1px solid #ddd;
+        text-align: center;
+        vertical-align: middle;
+    }
+    th {
+        background-color: #b8860b;
+        color: white;
+    }
+    select, input[type=number], input[type=text], input[type=file] {
+        padding: 5px;
+        width: 100px;
+    }
+    img {
+        width: 80px;
+        height: auto;
+        object-fit: contain;
+    }
+    .out-of-stock {
+        color: red;
+        font-weight: bold;
+    }
+    .message {
+        max-width: 600px;
+        margin: 10px auto;
+        padding: 15px;
+        border-radius: 5px;
+        text-align: center;
+    }
+    .error {
+        background-color: #f8d7da;
+        color: #842029;
+    }
+    .success {
+        background-color: #d1e7dd;
+        color: #0f5132;
+    }
+    button {
+        background-color: #b8860b;
+        color: white;
+        border: none;
+        padding: 7px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #8b6600;
+    }
+</style>
 </head>
 <body>
 
-<div class="sidebar">
-    <div>
-        <img src="logo.png" alt="Logo" class="logo">
-        <ul class="menu">
-            <li><a href="dashboard.php">🏠 Home</a></li>
-            <li><a href="inventory.php">📦 Inventory</a></li>
-            <li><a href="sales.php">📈 Sales</a></li>
-            <li><a href="suppliers.php">🚚 Suppliers</a></li>
-        </ul>
-    </div>
-    <div class="logout">
-        <a href="logout.php">🚪 Logout</a>
-    </div>
-</div>
+<h2>Product Inventory</h2>
 
-<div class="content">
-    <div class="topbar">
-        <h2>📦 Inventory</h2>
-        <input type="text" class="search-bar" placeholder="Search Products...">
-    </div>
+<?php if (!empty($error)) : ?>
+    <div class="message error"><?= htmlspecialchars($error) ?></div>
+<?php endif; ?>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Image</th>
-                <th>Product</th>
-                <th>Brand</th>
-                <th>Sizes</th>
-                <th>Colors</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        <?php foreach ($products as $index => $item): ?>
-            <?php if ($editIndex !== null && $editIndex == $index): ?>
-                <tr>
-                    <form method="POST">
-                        <td><input type="text" name="image" value="<?= htmlspecialchars($item[6]) ?>"></td>
-                        <td><input type="text" name="name" value="<?= htmlspecialchars($item[0]) ?>"></td>
-                        <td><input type="text" name="brand" value="<?= htmlspecialchars($item[3]) ?>"></td>
-                        <td><input type="text" name="sizes" value="<?= htmlspecialchars(implode(",", $item[1])) ?>"></td>
-                        <td><input type="text" name="colors" value="<?= htmlspecialchars(implode(",", $item[2])) ?>"></td>
-                        <td><input type="number" name="quantity" value="<?= htmlspecialchars($item[4]) ?>"></td>
-                        <td><input type="number" name="price" value="<?= htmlspecialchars($item[5]) ?>"></td>
-                        <td>
-                            <input type="hidden" name="index" value="<?= $index ?>">
-                            <button type="submit" name="save_edit">💾 Save</button>
-                        </td>
-                    </form>
-                </tr>
-            <?php else: ?>
-                <tr>
-                    <td>
-                        <?php
-                            $imagePath = 'images/' . htmlspecialchars($item[6]);
-                            echo file_exists($imagePath)
-                                ? '<img src="' . $imagePath . '" class="product-img">'
-                                : '<span style="color:red;">Image not found</span>';
-                        ?>
-                    </td>
-                    <td><?= htmlspecialchars($item[0]) ?></td>
-                    <td><?= htmlspecialchars($item[3]) ?></td>
-                    <td><select><?php foreach ($item[1] as $size): ?><option><?= htmlspecialchars($size) ?></option><?php endforeach; ?></select></td>
-                    <td><select><?php foreach ($item[2] as $color): ?><option><?= htmlspecialchars($color) ?></option><?php endforeach; ?></select></td>
-                    <td><?= $item[4] ?></td>
-                    <td>₱<?= number_format($item[5], 2) ?></td>
-                    <td>
-                        <form method="POST" style="display:inline;">
-                            <input type="hidden" name="index" value="<?= $index ?>">
-                            <button type="submit" name="edit_product">✏️</button>
-                        </form>
-                        <form method="POST" style="display:inline;">
-                            <input type="hidden" name="index" value="<?= $index ?>">
-                            <button type="submit" name="delete_product" onclick="return confirm('Delete this product?')">🗑️</button>
-                        </form>
-                    </td>
-                </tr>
-            <?php endif; ?>
-        <?php endforeach; ?>
-        </tbody>
-    </table>
+<?php if (!empty($success)) : ?>
+    <div class="message success"><?= htmlspecialchars($success) ?></div>
+<?php endif; ?>
 
-    <button class="toggle-form-button" onclick="toggleForm()">➕ Add Product</button>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Product Name</th>
+            <th>Sizes</th>
+            <th>Colors</th>
+            <th>Brand</th>
+            <th>Quantity</th>
+            <th>Price (₱)</th>
+            <th>Image</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    <?php foreach ($products as $item): ?>
+        <tr>
+            <td><?= htmlspecialchars($item['id']) ?></td>
+            <td><?= htmlspecialchars($item['product_name']) ?></td>
+            <td><?= htmlspecialchars($item['sizes']) ?></td>
+            <td><?= htmlspecialchars($item['colors']) ?></td>
+            <td><?= htmlspecialchars($item['brand']) ?></td>
+            <td><?= htmlspecialchars($item['quantity']) ?></td>
+            <td><?= number_format($item['price'], 2) ?></td>
+            <td>
+                <?php
+                $imagePath = "images/" . $item['image'];
+                if (file_exists($imagePath) && !empty($item['image'])) {
+                    echo "<img src='" . htmlspecialchars($imagePath) . "' alt='" . htmlspecialchars($item['product_name']) . "'>";
+                } else {
+                    echo "No Image";
+                }
+                ?>
+            </td>
+            <td>
+                <form style="display:inline;" method="GET" action="edit_product.php">
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($item['id']) ?>">
+                    <button type="submit">Edit</button>
+                </form>
+                <form style="display:inline;" method="POST" action="delete_product.php" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($item['id']) ?>">
+                    <button type="submit" name="delete_product" style="background-color:#d9534f;">Delete</button>
+                </form>
+            </td>
+        </tr>
+    <?php endforeach; ?>
 
-    <div class="form-container" id="addForm" style="display:none;">
-        <form method="POST">
-            <h3>Add New Product</h3>
-            <input type="text" name="name" placeholder="Product Name" required>
-            <input type="text" name="sizes" placeholder="Sizes (comma-separated)" required>
-            <input type="text" name="colors" placeholder="Colors (comma-separated)" required>
-            <input type="text" name="brand" placeholder="Brand" required>
-            <input type="number" name="quantity" placeholder="Quantity" required>
-            <input type="number" name="price" placeholder="Price" required>
-            <input type="text" name="image" placeholder="Image filename (e.g. tshirt.jpg)" required>
-            <button type="submit" name="add_product">➕ Add Product</button>
-        </form>
-    </div>
-</div>
+    <?php if (count($products) === 0): ?>
+        <tr><td colspan="9">No products found.</td></tr>
+    <?php endif; ?>
+    </tbody>
+</table>
+
+<h3>Add New Product</h3>
+<form method="POST" enctype="multipart/form-data">
+    <label for="product_name">Product Name:</label>
+    <input type="text" name="product_name" required><br><br>
+    <label for="sizes">Sizes (comma-separated):</label>
+    <input type="text" name="sizes" required><br><br>
+    <label for="colors">Colors (comma-separated):</label>
+    <input type="text" name="colors" required><br><br>
+    <label for="brand">Brand:</label>
+    <input type="text" name="brand" required><br><br>
+    <label for="quantity">Quantity:</label>
+    <input type="number" name="quantity" min="0" required><br><br>
+    <label for="price">Price (₱):</label>
+    <input type="number" name="price" step="0.01" min="0" required><br><br>
+    <label for="image">Image:</label>
+    <input type="file" name="image" accept="image/*"><br><br>
+    <button type="submit" name="add_product">Add Product</button>
+</form>
 
 </body>
 </html>

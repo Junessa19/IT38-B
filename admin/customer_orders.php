@@ -17,10 +17,11 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Fetch all orders (without status)
-$sql = "SELECT user_id, product_name, size, color, quantity, total_price, order_date
-        FROM orders
-        ORDER BY order_date DESC";
+// Fetch all orders with product name, calculate total price
+$sql = "SELECT o.user_id, p.product_name, o.quantity, (o.quantity * p.price) AS total_price, o.order_date
+        FROM orders o
+        JOIN products p ON o.product_id = p.id
+        ORDER BY o.order_date DESC";
 $result = $conn->query($sql);
 if (!$result) {
     die("Error retrieving orders: " . $conn->error);
@@ -47,8 +48,6 @@ if (!$result) {
             <tr>
                 <th>User ID</th>
                 <th>Product</th>
-                <th>Size</th>
-                <th>Color</th>
                 <th>Quantity</th>
                 <th>Total Price</th>
                 <th>Order Date</th>
@@ -60,8 +59,6 @@ if (!$result) {
                 <tr>
                     <td><?= htmlspecialchars($row["user_id"]) ?></td>
                     <td><?= htmlspecialchars($row["product_name"]) ?></td>
-                    <td><?= htmlspecialchars($row["size"]) ?></td>
-                    <td><?= htmlspecialchars($row["color"]) ?></td>
                     <td><?= (int)$row["quantity"] ?></td>
                     <td>₱<?= number_format($row["total_price"], 2) ?></td>
                     <td><?= htmlspecialchars($row["order_date"]) ?></td>
@@ -69,7 +66,7 @@ if (!$result) {
                 <?php endwhile; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="7">No orders found.</td>
+                    <td colspan="5">No orders found.</td>
                 </tr>
             <?php endif; ?>
         </tbody>

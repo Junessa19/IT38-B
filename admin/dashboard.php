@@ -1,26 +1,38 @@
 <?php
-    session_start();
+session_start();
+if (!isset($_SESSION["user"])) {
+    header("Location: login.php");
+    exit();
+}
 
-    if (!isset($_SESSION["user"])) {
-        header("Location: login.php");
-        exit();
-    }
+$completedOrders = 25;
+$pendingOrders = 8;
+$cancelledOrders = 2;
 
-    
-    $completedOrders = 25;
-    $pendingOrders = 8;
-    $cancelledOrders = 2;
+$topSelling = [
+    ['name' => 'White T-Shirt', 'sold' => 120],
+    ['name' => 'Denim Jacket', 'sold' => 95],
+    ['name' => 'Black Jeans', 'sold' => 80],
+];
 
-    $topSelling = [
-        ['name' => 'White T-Shirt', 'sold' => 120],
-        ['name' => 'Denim Jacket', 'sold' => 95],
-        ['name' => 'Black Jeans', 'sold' => 80],
-    ];
+$inventoryValue = 23500;
+$lowStockItems = 4;
+$outOfStockItems = 2;
+$totalItems = 60;
 
-    $inventoryValue = 23500; 
-    $lowStockItems = 4;
-    $outOfStockItems = 2;
-    $totalItems = 60;
+$supplierOrders = [
+    ['order_id' => 'ORD001', 'item' => 'Cotton Fabric', 'status' => 'Delivered'],
+    ['order_id' => 'ORD002', 'item' => 'Buttons', 'status' => 'In Transit'],
+    ['order_id' => 'ORD003', 'item' => 'Zippers', 'status' => 'Ordered'],
+    ['order_id' => 'ORD004', 'item' => 'Labels', 'status' => 'Cancelled'],
+];
+
+$deliverySummary = [
+    'Ordered' => 1,
+    'In Transit' => 1,
+    'Delivered' => 1,
+    'Cancelled' => 1,
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,7 +40,6 @@
     <meta charset="UTF-8">
     <title>StockHub Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
- 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -125,7 +136,7 @@
             padding-left: 0;
         }
         .card ul li {
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
     </style>
 </head>
@@ -138,7 +149,7 @@
             <li><a href="#">🏠 Home</a></li>
             <li><a href="inventory.php">📦 Inventory</a></li>
             <li><a href="sales.php">📈 Sales</a></li>
-            <li><a href="suppliers.php">🚚 Suppliers</a></li>
+            <li><a href="suppliers.php">🏭 Suppliers</a></li>
         </ul>
         <a href="logout.php" class="logout">🚪 Logout</a>
     </div>
@@ -150,15 +161,14 @@
         </div>
 
         <div class="dashboard-content">
-         
             <div class="card">
                 <h3>📊 Order Status</h3>
-                <canvas id="orderChart" width="100" height="100"></canvas>
+                <canvas id="orderChart"></canvas>
             </div>
 
             <div class="card">
                 <h3>📈 Top Selling Products</h3>
-                <canvas id="topProductsChart" width="100" height="100"></canvas>
+                <canvas id="topProductsChart"></canvas>
             </div>
 
             <div class="card">
@@ -175,22 +185,39 @@
                     <li>📦 Total Items: <?= $totalItems ?></li>
                 </ul>
             </div>
+
+            <div class="card">
+                <h3>🚚 Supplier Orders</h3>
+                <ul>
+                    <?php foreach ($supplierOrders as $order): ?>
+                        <li>
+                            <strong><?= $order['order_id'] ?></strong>: <?= $order['item'] ?> -
+                            <span style="color:
+                                <?= $order['status'] === 'Delivered' ? 'green' :
+                                    ($order['status'] === 'In Transit' ? 'orange' :
+                                    ($order['status'] === 'Ordered' ? '#007bff' : 'red')) ?>;">
+                                <?= $order['status'] ?>
+                            </span>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>📦 Delivery Status Overview</h3>
+                <canvas id="deliveryChart"></canvas>
+            </div>
         </div>
     </div>
 
     <script>
-
         const orderChart = document.getElementById('orderChart').getContext('2d');
         new Chart(orderChart, {
             type: 'pie',
             data: {
                 labels: ['Completed', 'Pending', 'Cancelled'],
                 datasets: [{
-                    data: [
-                        <?= $completedOrders ?>,
-                        <?= $pendingOrders ?>,
-                        <?= $cancelledOrders ?>
-                    ],
+                    data: [<?= $completedOrders ?>, <?= $pendingOrders ?>, <?= $cancelledOrders ?>],
                     backgroundColor: ['#28a745', '#ffc107', '#dc3545']
                 }]
             },
@@ -220,6 +247,26 @@
                 scales: {
                     y: {
                         beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        const deliveryChart = document.getElementById('deliveryChart').getContext('2d');
+        new Chart(deliveryChart, {
+            type: 'doughnut',
+            data: {
+                labels: ['Ordered', 'In Transit', 'Delivered', 'Cancelled'],
+                datasets: [{
+                    data: [<?= $deliverySummary['Ordered'] ?>, <?= $deliverySummary['In Transit'] ?>, <?= $deliverySummary['Delivered'] ?>, <?= $deliverySummary['Cancelled'] ?>],
+                    backgroundColor: ['#007bff', 'orange', 'green', 'red']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
                     }
                 }
             }
